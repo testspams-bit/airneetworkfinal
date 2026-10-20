@@ -4,9 +4,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateChatReply, type ChatTurn } from './server/chatService.ts';
 
+import fs from 'node:fs';
+
 const app = express();
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
-const distPath = path.join(projectRoot, 'dist', 'public');
+const distPath = fs.existsSync(path.join(projectRoot, 'dist', 'index.html'))
+  ? path.join(projectRoot, 'dist')
+  : path.join(projectRoot, 'dist', 'public');
 
 app.use(express.json({ limit: '16kb' }));
 
