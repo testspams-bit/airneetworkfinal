@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%" fill="none">
+  <!-- Blue Background (Matching AIR (1).png) -->
+  <rect width="500" height="500" fill="#0066FF" rx="36"/>
+
+  <!-- Mortarboard Graduation Cap -->
+  <g id="cap" transform="translate(250, 90)">
+    <!-- Diamond -->
+    <polygon points="0,-48 100,-20 0,8 -100,-20" fill="#FFFFFF"/>
+    <!-- Skull Cap Underside -->
+    <path d="M -56,-14 Q 0,22 56,-14 L 56,-2 Q 0,34 -56,-2 Z" fill="#FFFFFF"/>
+    <!-- Button & Left Tassel -->
+    <circle cx="0" cy="-20" r="4.5" fill="#0066FF"/>
+    <path d="M 0,-20 Q -46,-10 -68,8 L -68,48" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <!-- Tassel Brush -->
+    <polygon points="-73,48 -63,48 -64,72 -72,72" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Bold Slanted "AIR" Wordmark (Faithful to AIR (1).png) -->
+  <g id="air" transform="translate(250, 245)">
+    <!-- Letter A -->
+    <path d="M -195,45 L -145,45 L -174,-45 L -220,-45 L -258,45 L -215,45 L -207,26 L -175,26 Z M -191,-14 L -183,10 L -201,10 Z" fill="#FFFFFF"/>
+    
+    <!-- Letter I -->
+    <path d="M -112,45 L -68,45 L -38,-45 L -82,-45 Z" fill="#FFFFFF"/>
+    
+    <!-- Letter R -->
+    <path d="M -24,45 L 20,45 L 31,9 C 33,9 38,9 44,9 C 74,9 94,-1 99,-20 C 104,-39 88,-45 58,-45 L -2,-45 Z M 34,-26 L 49,-26 C 60,-26 65,-23 63,-17 C 61,-11 53,-9 43,-9 L 29,-9 Z" fill="#FFFFFF"/>
+    <!-- Circular cutout notch detail inside R -->
+    <circle cx="43" cy="-17" r="10.5" fill="#0066FF"/>
+    <circle cx="43" cy="-17" r="7" fill="#FFFFFF"/>
+    <!-- R's dynamic curved kick leg -->
+    <path d="M 40,2 L 60,2 L 78,45 L 120,45 L 96,1 C 86,-2 72,-1 62,0 Z" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Geometric "NEETWORK" Sub-wordmark (Faithful to AIR (1).png) -->
+  <g id="neetwork" transform="translate(48, 345)">
+    <!-- N with bottom-left solid triangle -->
+    <path d="M 0,38 L 10,38 L 34,8 L 34,38 L 44,38 L 44,0 L 32,0 L 10,28 L 10,0 L 0,0 Z" fill="#FFFFFF"/>
+    <polygon points="0,38 0,18 20,38" fill="#FFFFFF"/>
+
+    <!-- E -->
+    <path d="M 58,38 L 98,38 L 98,30 L 70,30 L 70,23 L 94,23 L 94,15 L 70,15 L 70,8 L 98,8 L 98,0 L 58,0 Z" fill="#FFFFFF"/>
+
+    <!-- E -->
+    <path d="M 112,38 L 152,38 L 152,30 L 124,30 L 124,23 L 148,23 L 148,15 L 124,15 L 124,8 L 152,8 L 152,0 L 112,0 Z" fill="#FFFFFF"/>
+
+    <!-- T -->
+    <path d="M 166,0 L 206,0 L 206,8 L 190,8 L 190,38 L 182,38 L 182,8 L 166,8 Z" fill="#FFFFFF"/>
+
+    <!-- W -->
+    <path d="M 218,0 L 229,38 L 238,38 L 249,11 L 260,38 L 269,38 L 280,0 L 268,0 L 262,26 L 251,0 L 247,0 L 236,26 L 230,0 Z" fill="#FFFFFF"/>
+
+    <!-- O -->
+    <path d="M 304,0 C 290,0 280,9 280,19 C 280,29 290,38 304,38 C 318,38 328,29 328,19 C 328,9 318,0 304,0 Z M 304,30 C 296,30 291,25 291,19 C 291,13 296,8 304,8 C 312,8 317,13 317,19 C 317,25 312,30 304,30 Z" fill="#FFFFFF"/>
+
+    <!-- R -->
+    <path d="M 342,38 L 352,38 L 352,22 L 366,22 L 379,38 L 392,38 L 377,21 C 386,19 392,14 392,9 C 392,3 386,0 376,0 L 342,0 Z M 352,15 L 352,7 L 374,7 C 378,7 381,8 381,11 C 381,14 378,15 374,15 Z" fill="#FFFFFF"/>
+
+    <!-- K with filled triangular wings -->
+    <path d="M 406,38 L 416,38 L 416,0 L 406,0 Z" fill="#FFFFFF"/>
+    <polygon points="421,18 446,0 421,0" fill="#FFFFFF"/>
+    <polygon points="421,20 446,38 421,38" fill="#FFFFFF"/>
+  </g>
+</svg>

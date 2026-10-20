@@ -1,0 +1,6 @@
+{
+  "name": "AIR NEETwork",
+  "description": "Personalized 1-on-1 mentorship for NEET UG aspirants by top All India Rankers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
