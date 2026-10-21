@@ -47,6 +47,11 @@ export default function App() {
     const unsubscribe = subscribeToAuth((user) => {
       setCurrentUser(user);
     });
+
+    if (typeof window !== 'undefined' && sessionStorage.getItem('airneet_auth_error')) {
+      setIsLoginOpen(true);
+    }
+
     return () => unsubscribe();
   }, []);
 

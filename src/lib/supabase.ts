@@ -10,7 +10,14 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABA
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
 export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        flowType: 'pkce',
+      },
+    })
   : null;
 
 export type AccountRole = 'student_mentee' | 'mentor';
@@ -30,12 +37,24 @@ export interface AuthUserData {
 const LOCAL_STORAGE_USER_KEY = 'airneet_current_user';
 const LOCAL_STORAGE_ACCOUNTS_KEY = 'airneet_local_accounts';
 const AUTH_EVENT_NAME = 'airneet_auth_change';
+const AUTH_ERROR_SESSION_KEY = 'airneet_auth_error';
 
 // Helper to notify listeners of auth state change
 function emitAuthChange(user: AuthUserData | null) {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(AUTH_EVENT_NAME, { detail: user }));
   }
+}
+
+// Retrieve and clear any OAuth error from sessionStorage
+export function getAndClearAuthError(): string | null {
+  if (typeof window === 'undefined') return null;
+  const err = sessionStorage.getItem(AUTH_ERROR_SESSION_KEY);
+  if (err) {
+    sessionStorage.removeItem(AUTH_ERROR_SESSION_KEY);
+    return err;
+  }
+  return null;
 }
 
 // Get the current user synchronously from local storage or cached session
@@ -52,10 +71,9 @@ export function getCurrentAuthUser(): AuthUserData | null {
 
 // Subscribe to auth state changes across the application
 export function subscribeToAuth(callback: (user: AuthUserData | null) => void): () => void {
-  // First send immediate current state
+  // First send immediate current state from storage
   callback(getCurrentAuthUser());
 
-  // Listen to Supabase if configured
   let supabaseUnsub: (() => void) | null = null;
   if (supabase) {
     const handleSession = (session: Session | null) => {
@@ -63,6 +81,7 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
         const u = session.user;
         const storedRole = localStorage.getItem('airneet-auth-role') as AccountRole | null;
         const pendingRegistration = localStorage.getItem('airneet-auth-registration');
+
         if (storedRole && !u.user_metadata?.air_neetwork_role) {
           let regData: Record<string, unknown> = {};
           if (pendingRegistration) {
@@ -87,7 +106,7 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
           id: u.id,
           email: u.email || '',
           role,
-          fullName: (u.user_metadata?.full_name as string) || undefined,
+          fullName: (u.user_metadata?.full_name as string) || (u.user_metadata?.name as string) || undefined,
           phone: (u.user_metadata?.contact_phone as string) || undefined,
           provider: session.user.app_metadata?.provider === 'google' ? 'google' : 'email',
         };
@@ -99,8 +118,57 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
       }
     };
 
-    void supabase.auth.getSession().then(({ data }) => handleSession(data.session));
+    // 1. Process URL parameters if returning from an OAuth flow
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
 
+      // Check for OAuth error in query or hash
+      const oauthError =
+        searchParams.get('error_description') ||
+        searchParams.get('error') ||
+        hashParams.get('error_description') ||
+        hashParams.get('error');
+
+      if (oauthError) {
+        console.warn('OAuth redirect error:', oauthError);
+        sessionStorage.setItem(AUTH_ERROR_SESSION_KEY, oauthError);
+        // Clean URL error parameters without reloading
+        const clean = new URL(window.location.href);
+        clean.searchParams.delete('error');
+        clean.searchParams.delete('error_description');
+        clean.searchParams.delete('error_code');
+        clean.hash = '';
+        window.history.replaceState({}, document.title, clean.toString());
+      }
+
+      // Check for PKCE authorization code in query
+      const code = searchParams.get('code');
+      if (code) {
+        void supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
+          if (error) {
+            console.error('exchangeCodeForSession failed:', error.message);
+            sessionStorage.setItem(AUTH_ERROR_SESSION_KEY, error.message);
+          } else if (data?.session) {
+            handleSession(data.session);
+          }
+          // Clean code parameter from URL
+          const clean = new URL(window.location.href);
+          clean.searchParams.delete('code');
+          clean.searchParams.delete('authRole');
+          window.history.replaceState({}, document.title, clean.toString());
+        });
+      }
+    }
+
+    // 2. Initial session check
+    void supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        handleSession(data.session);
+      }
+    });
+
+    // 3. Listen to all auth state changes
     const { data } = supabase.auth.onAuthStateChange(async (_event, session: Session | null) => {
       handleSession(session);
     });
@@ -291,12 +359,20 @@ export async function signInWithGoogle(
     if (extraData) {
       localStorage.setItem('airneet-auth-registration', JSON.stringify(extraData));
     }
-    const callbackUrl = new URL(window.location.href);
-    callbackUrl.searchParams.set('authRole', role);
 
-    const { error } = await supabase.auth.signInWithOAuth({
+    // Clean redirect URL pointing to origin without query parameters
+    // Matches Supabase dashboard allowed Redirect URL list accurately
+    const cleanRedirectUrl = window.location.origin + window.location.pathname;
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: callbackUrl.toString() },
+      options: {
+        redirectTo: cleanRedirectUrl,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
     });
     if (error) {
       localStorage.removeItem('airneet-auth-role');
@@ -323,6 +399,8 @@ export async function signInWithGoogle(
 // Sign out from any active session
 export async function authSignOut(): Promise<void> {
   localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
+  localStorage.removeItem('airneet-auth-role');
+  localStorage.removeItem('airneet-auth-registration');
   if (supabase) {
     try {
       await supabase.auth.signOut();

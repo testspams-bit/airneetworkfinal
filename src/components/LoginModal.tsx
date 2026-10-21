@@ -20,6 +20,7 @@ import {
   signInWithEmail,
   signUpWithEmail,
   signInWithGoogle,
+  getAndClearAuthError,
   type AccountRole,
 } from '../lib/supabase.ts';
 
@@ -53,14 +54,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     };
     if (isOpen) {
       window.addEventListener('keydown', handleKeyDown);
-      setStep('role');
-      setRole('student_mentee');
-      setAuthMode('login');
+      const pendingError = getAndClearAuthError();
+      if (pendingError) {
+        setStep('auth');
+        setAuthMode('login');
+        setAuthMessage({ text: `Google Sign-in: ${pendingError}`, type: 'error' });
+      } else {
+        setStep('role');
+        setRole('student_mentee');
+        setAuthMode('login');
+        setAuthMessage(null);
+      }
       setFullName('');
       setPhone('');
       setEmail('');
       setPassword('');
-      setAuthMessage(null);
     }
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
