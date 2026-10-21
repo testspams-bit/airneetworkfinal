@@ -46,6 +46,17 @@ function emitAuthChange(user: AuthUserData | null) {
   }
 }
 
+// Dispatches an event that immediately pops open the LoginModal with an error and preselects the tab
+function dispatchAuthErrorModal(message: string, mode: 'login' | 'signup' = 'login', role?: AccountRole) {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('airneet_show_auth_error', {
+        detail: { message, mode, role },
+      })
+    );
+  }
+}
+
 // Retrieve and clear any OAuth error from sessionStorage
 export function getAndClearAuthError(): string | null {
   if (typeof window === 'undefined') return null;
@@ -93,10 +104,9 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
             localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
             localStorage.removeItem('airneet-auth-role');
             localStorage.removeItem('airneet-auth-mode');
-            sessionStorage.setItem(
-              AUTH_ERROR_SESSION_KEY,
-              `No ${storedRole === 'mentor' ? 'Mentor' : 'Student'} account found for ${u.email}. Please switch to the "Register" tab to create your ${storedRole === 'mentor' ? 'Mentor' : 'Student'} account first.`
-            );
+            const message = `No ${storedRole === 'mentor' ? 'Mentor' : 'Student'} account found for ${u.email}. Please switch to the "Register" tab to create your ${storedRole === 'mentor' ? 'Mentor' : 'Student'} account first.`;
+            sessionStorage.setItem(AUTH_ERROR_SESSION_KEY, message);
+            dispatchAuthErrorModal(message, 'signup', storedRole);
             callback(null);
             emitAuthChange(null);
             return;
@@ -104,15 +114,14 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
 
           // If role doesn't match the requested portal (e.g. Student trying to log into Mentor portal)
           if (savedRole !== storedRole) {
-            console.warn(`Role mismatch: user is ${savedRole}, requested ${storedRole}`);
+            console.warn(`Role mismatch: account is ${savedRole}, requested ${storedRole}`);
             void supabase.auth.signOut();
             localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
             localStorage.removeItem('airneet-auth-role');
             localStorage.removeItem('airneet-auth-mode');
-            sessionStorage.setItem(
-              AUTH_ERROR_SESSION_KEY,
-              `This account is registered as a ${savedRole === 'mentor' ? 'Mentor' : 'Student Mentee'}. Please switch to the ${savedRole === 'mentor' ? 'Mentor' : 'Student'} portal to sign in.`
-            );
+            const message = `This account is registered as a ${savedRole === 'mentor' ? 'Mentor' : 'Student Mentee'}. Please switch to the ${savedRole === 'mentor' ? 'Mentor' : 'Student'} portal to sign in.`;
+            sessionStorage.setItem(AUTH_ERROR_SESSION_KEY, message);
+            dispatchAuthErrorModal(message, 'login', savedRole);
             callback(null);
             emitAuthChange(null);
             return;
@@ -121,23 +130,27 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
 
         // MODE 2: REGISTER CHECKS
         if (storedMode === 'signup' && storedRole) {
-          // If already registered with the OPPOSITE role
-          if (savedRole && savedRole !== storedRole) {
-            console.warn(`Cannot re-register ${savedRole} as ${storedRole}`);
+          // If the account is ALREADY registered with ANY role:
+          if (savedRole) {
+            console.warn(`Account is already registered as ${savedRole}`);
             void supabase.auth.signOut();
             localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
             localStorage.removeItem('airneet-auth-role');
             localStorage.removeItem('airneet-auth-mode');
-            sessionStorage.setItem(
-              AUTH_ERROR_SESSION_KEY,
-              `This account is already registered as a ${savedRole === 'mentor' ? 'Mentor' : 'Student Mentee'}. You cannot register the same account as both. Please sign in via the ${savedRole === 'mentor' ? 'Mentor' : 'Student'} portal, or use another account.`
-            );
+            localStorage.removeItem('airneet-auth-registration');
+
+            const message = savedRole === storedRole
+              ? `You are already registered as a ${savedRole === 'mentor' ? 'Mentor' : 'Student Mentee'}. Please click "Log in" to sign in.`
+              : `This account is already registered as a ${savedRole === 'mentor' ? 'Mentor' : 'Student Mentee'}. Please switch to the ${savedRole === 'mentor' ? 'Mentor' : 'Student'} portal to sign in.`;
+
+            sessionStorage.setItem(AUTH_ERROR_SESSION_KEY, message);
+            dispatchAuthErrorModal(message, 'login', savedRole);
             callback(null);
             emitAuthChange(null);
             return;
           }
 
-          // Save new role to user metadata in Supabase
+          // Brand new user registering: save the selected role into Supabase user metadata
           let regData: Record<string, unknown> = {};
           if (pendingRegistration) {
             try {
@@ -155,9 +168,7 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
           });
         }
 
-        // Compute authoritative role
-        // For registration: the explicitly selected role (mentor or student_mentee)
-        // For login: savedRole from metadata, or storedRole
+        // Authoritative role calculation
         const finalRole: AccountRole =
           (storedMode === 'signup' && storedRole) ? storedRole : (savedRole || storedRole || 'student_mentee');
 
@@ -198,6 +209,7 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
       if (oauthError) {
         console.warn('OAuth redirect error:', oauthError);
         sessionStorage.setItem(AUTH_ERROR_SESSION_KEY, oauthError);
+        dispatchAuthErrorModal(oauthError);
         const clean = new URL(window.location.href);
         clean.searchParams.delete('error');
         clean.searchParams.delete('error_description');
@@ -260,6 +272,13 @@ export async function signUpWithEmail(params: {
     });
     if (error) throw error;
 
+    // Check if account already existed
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      throw new Error(
+        'This email is already registered. Please switch to the "Log in" tab to sign in.'
+      );
+    }
+
     if (data.user) {
       const userData: AuthUserData = {
         id: data.user.id,
@@ -293,7 +312,7 @@ export async function signUpWithEmail(params: {
 
   const existing = accounts.find((a) => a.email.toLowerCase() === email.trim().toLowerCase());
   if (existing) {
-    throw new Error('An account with this email already exists. Please log in.');
+    throw new Error('This email is already registered. Please switch to the "Log in" tab to sign in.');
   }
 
   const newUser: AuthUserData = {

@@ -28,12 +28,18 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   theme: 'dark' | 'light';
+  initialState?: {
+    message?: string;
+    mode?: 'login' | 'signup';
+    role?: AccountRole;
+  } | null;
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({
   isOpen,
   onClose,
   theme,
+  initialState,
 }) => {
   const isDark = theme === 'dark';
   const [step, setStep] = useState<'role' | 'auth'>('role');
@@ -46,34 +52,73 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authMessage, setAuthMessage] = useState<{ text: string; type: 'error' | 'success' | 'info' } | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Independent loading states
+  const [isEmailSubmitting, setIsEmailSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
+
     if (isOpen) {
       window.addEventListener('keydown', handleKeyDown);
-      const pendingError = getAndClearAuthError();
-      if (pendingError) {
+      setIsEmailSubmitting(false);
+      setIsGoogleSubmitting(false);
+
+      if (initialState?.message) {
         setStep('auth');
-        setAuthMode('login');
-        setAuthMessage({ text: `Google Sign-in: ${pendingError}`, type: 'error' });
+        setAuthMode(initialState.mode || 'login');
+        if (initialState.role) setRole(initialState.role);
+        setAuthMessage({ text: initialState.message, type: 'error' });
       } else {
-        setStep('role');
-        setRole('student_mentee');
-        setAuthMode('login');
-        setAuthMessage(null);
+        const pendingError = getAndClearAuthError();
+        if (pendingError) {
+          setStep('auth');
+          setAuthMode('login');
+          setAuthMessage({ text: pendingError, type: 'error' });
+        } else {
+          setStep('role');
+          setRole('student_mentee');
+          setAuthMode('login');
+          setAuthMessage(null);
+        }
       }
       setFullName('');
       setPhone('');
       setEmail('');
       setPassword('');
+    } else {
+      setIsEmailSubmitting(false);
+      setIsGoogleSubmitting(false);
     }
+
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, initialState]);
 
   if (!isOpen) return null;
+
+  const handleRoleSelect = (selectedRole: AccountRole) => {
+    setRole(selectedRole);
+    setIsEmailSubmitting(false);
+    setIsGoogleSubmitting(false);
+    setAuthMessage(null);
+  };
+
+  const handleModeSwitch = (mode: 'login' | 'signup') => {
+    setAuthMode(mode);
+    setIsEmailSubmitting(false);
+    setIsGoogleSubmitting(false);
+    setAuthMessage(null);
+  };
+
+  const handleBackToRole = () => {
+    setStep('role');
+    setIsEmailSubmitting(false);
+    setIsGoogleSubmitting(false);
+    setAuthMessage(null);
+  };
 
   const validateInputs = () => {
     if (!email.trim()) {
@@ -101,7 +146,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
     if (!validateInputs()) return;
 
-    setIsSubmitting(true);
+    setIsEmailSubmitting(true);
     try {
       if (authMode === 'signup') {
         const result = await signUpWithEmail({
@@ -129,13 +174,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       const msg = err instanceof Error ? err.message : 'Authentication failed. Please check your details.';
       setAuthMessage({ text: msg, type: 'error' });
     } finally {
-      setIsSubmitting(false);
+      setIsEmailSubmitting(false);
     }
   };
 
   const handleGoogleAuth = async () => {
     setAuthMessage(null);
-    setIsSubmitting(true);
+    setIsGoogleSubmitting(true);
     try {
       await signInWithGoogle(
         role,
@@ -146,14 +191,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         },
         authMode
       );
-      setAuthMessage({ text: 'Google authentication successful! Signing in...', type: 'success' });
-      window.setTimeout(onClose, 800);
+      setAuthMessage({ text: 'Redirecting to Google...', type: 'info' });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Google sign-in could not be completed.';
       setAuthMessage({ text: msg, type: 'error' });
-      setIsSubmitting(false);
+      setIsGoogleSubmitting(false);
     }
   };
+
+  const isAnySubmitting = isEmailSubmitting || isGoogleSubmitting;
 
   return (
     <div
@@ -207,7 +253,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="button"
                 aria-pressed={role === 'student_mentee'}
-                onClick={() => setRole('student_mentee')}
+                onClick={() => handleRoleSelect('student_mentee')}
                 className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-3 text-center transition cursor-pointer ${
                   isDark
                     ? role === 'student_mentee'
@@ -236,7 +282,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="button"
                 aria-pressed={role === 'mentor'}
-                onClick={() => setRole('mentor')}
+                onClick={() => handleRoleSelect('mentor')}
                 className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-3 text-center transition cursor-pointer ${
                   isDark
                     ? role === 'mentor'
@@ -267,6 +313,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               type="button"
               onClick={() => {
                 setStep('auth');
+                setIsEmailSubmitting(false);
+                setIsGoogleSubmitting(false);
                 setAuthMessage(null);
               }}
               className={`w-full rounded-xl py-2.5 text-sm font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm ${
@@ -285,10 +333,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             <div className="flex items-center justify-between mb-3">
               <button
                 type="button"
-                onClick={() => {
-                  setStep('role');
-                  setAuthMessage(null);
-                }}
+                onClick={handleBackToRole}
                 className={`flex items-center gap-1 text-xs cursor-pointer ${
                   isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
@@ -314,10 +359,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 <button
                   key={mode}
                   type="button"
-                  onClick={() => {
-                    setAuthMode(mode);
-                    setAuthMessage(null);
-                  }}
+                  onClick={() => handleModeSwitch(mode)}
                   className={`flex-1 rounded-lg py-2 transition cursor-pointer ${
                     authMode === mode
                       ? isDark
@@ -335,7 +377,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             <button
               type="button"
               onClick={handleGoogleAuth}
-              disabled={isSubmitting}
+              disabled={isAnySubmitting}
               aria-label="Continue with Google"
               className={`flex w-full items-center justify-center gap-2.5 rounded-xl border py-2.5 px-3 text-sm font-semibold transition disabled:opacity-60 cursor-pointer shadow-xs ${
                 isDark
@@ -343,25 +385,38 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-800'
               }`}
             >
-              <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0">
-                <path
-                  fill="#4285F4"
-                  d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.44a5.5 5.5 0 0 1-2.39 3.61v3h3.87c2.27-2.09 3.57-5.17 3.57-8.64Z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 24c3.24 0 5.96-1.08 7.95-2.92l-3.87-3c-1.08.72-2.46 1.15-4.08 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.1A12 12 0 0 0 12 24Z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.27 14.27A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.55.37-2.27v-3.1H1.27A12 12 0 0 0 0 12c0 1.93.46 3.76 1.27 5.37l4-3.1Z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 4.77c1.77 0 3.36.61 4.61 1.81l3.46-3.46C17.98 1.19 15.24 0 12 0A12 12 0 0 0 1.27 6.63l4 3.1c.95-2.85 3.6-4.96 6.73-4.96Z"
-                />
-              </svg>
-              <span>{authMode === 'signup' ? `Register with Google (${role === 'mentor' ? 'Mentor' : 'Student'})` : `Log in with Google (${role === 'mentor' ? 'Mentor' : 'Student'})`}</span>
+              {isGoogleSubmitting ? (
+                <>
+                  <LoaderCircle className="h-4 w-4 animate-spin text-[#CCFF00]" />
+                  <span>Connecting to Google...</span>
+                </>
+              ) : (
+                <>
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4 shrink-0">
+                    <path
+                      fill="#4285F4"
+                      d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.44a5.5 5.5 0 0 1-2.39 3.61v3h3.87c2.27-2.09 3.57-5.17 3.57-8.64Z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24c3.24 0 5.96-1.08 7.95-2.92l-3.87-3c-1.08.72-2.46 1.15-4.08 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.1A12 12 0 0 0 12 24Z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.27 14.27A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.55.37-2.27v-3.1H1.27A12 12 0 0 0 0 12c0 1.93.46 3.76 1.27 5.37l4-3.1Z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 4.77c1.77 0 3.36.61 4.61 1.81l3.46-3.46C17.98 1.19 15.24 0 12 0A12 12 0 0 0 1.27 6.63l4 3.1c.95-2.85 3.6-4.96 6.73-4.96Z"
+                    />
+                  </svg>
+                  <span>
+                    {authMode === 'signup'
+                      ? `Register with Google (${role === 'mentor' ? 'Mentor' : 'Student'})`
+                      : `Log in with Google (${role === 'mentor' ? 'Mentor' : 'Student'})`}
+                  </span>
+                </>
+              )}
             </button>
 
             {/* Divider */}
@@ -471,14 +526,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isAnySubmitting}
                 className={`mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition disabled:opacity-60 cursor-pointer shadow-sm ${
                   isDark
                     ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
                     : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
                 }`}
               >
-                {isSubmitting ? (
+                {isEmailSubmitting ? (
                   <>
                     <LoaderCircle className="h-4 w-4 animate-spin" />
                     <span>Authenticating...</span>

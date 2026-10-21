@@ -13,7 +13,7 @@ import { DesktopNav, MobileBottomNav } from './components/Navigation.tsx';
 import { AnimatedCursor } from './components/AnimatedCursor.tsx';
 import { SupportAgentIcon } from './components/SupportAgentIcon.tsx';
 import { AIChatModal } from './components/AIChatModal.tsx';
-import { subscribeToAuth, authSignOut, type AuthUserData } from './lib/supabase.ts';
+import { subscribeToAuth, authSignOut, type AuthUserData, type AccountRole } from './lib/supabase.ts';
 import { AboutSection } from './components/AboutSection.tsx';
 import { NeetTimer } from './components/NeetTimer.tsx';
 import { HomeSection } from './components/HomeSection.tsx';
@@ -43,16 +43,44 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<AuthUserData | null>(null);
   const signedInEmail = currentUser?.email ?? null;
 
+  const [authModalState, setAuthModalState] = useState<{
+    message?: string;
+    mode?: 'login' | 'signup';
+    role?: AccountRole;
+  } | null>(null);
+
   useEffect(() => {
+    const handleAuthError = (event: Event) => {
+      const custom = event as CustomEvent<{ message: string; mode?: 'login' | 'signup'; role?: AccountRole }>;
+      if (custom.detail?.message) {
+        setAuthModalState({
+          message: custom.detail.message,
+          mode: custom.detail.mode || 'login',
+          role: custom.detail.role,
+        });
+        setIsLoginOpen(true);
+      }
+    };
+
+    window.addEventListener('airneet_show_auth_error', handleAuthError);
+
+    if (typeof window !== 'undefined') {
+      const savedError = sessionStorage.getItem('airneet_auth_error');
+      if (savedError) {
+        sessionStorage.removeItem('airneet_auth_error');
+        setAuthModalState({ message: savedError, mode: 'login' });
+        setIsLoginOpen(true);
+      }
+    }
+
     const unsubscribe = subscribeToAuth((user) => {
       setCurrentUser(user);
     });
 
-    if (typeof window !== 'undefined' && sessionStorage.getItem('airneet_auth_error')) {
-      setIsLoginOpen(true);
-    }
-
-    return () => unsubscribe();
+    return () => {
+      window.removeEventListener('airneet_show_auth_error', handleAuthError);
+      unsubscribe();
+    };
   }, []);
 
   const handleLoginButton = async () => {
@@ -315,8 +343,12 @@ export default function App() {
       {/* Student & Mentor Login Modal */}
       <LoginModal
         isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
+        onClose={() => {
+          setIsLoginOpen(false);
+          setAuthModalState(null);
+        }}
         theme={theme}
+        initialState={authModalState}
       />
 
       {/* Instagram & YouTube Pop-up Modal */}
