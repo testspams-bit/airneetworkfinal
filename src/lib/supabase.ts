@@ -15,7 +15,7 @@ export const supabase = isSupabaseConfigured
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
-        flowType: 'pkce',
+        flowType: 'implicit',
       },
     })
   : null;
@@ -133,31 +133,12 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
       if (oauthError) {
         console.warn('OAuth redirect error:', oauthError);
         sessionStorage.setItem(AUTH_ERROR_SESSION_KEY, oauthError);
-        // Clean URL error parameters without reloading
         const clean = new URL(window.location.href);
         clean.searchParams.delete('error');
         clean.searchParams.delete('error_description');
         clean.searchParams.delete('error_code');
         clean.hash = '';
         window.history.replaceState({}, document.title, clean.toString());
-      }
-
-      // Check for PKCE authorization code in query
-      const code = searchParams.get('code');
-      if (code) {
-        void supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
-          if (error) {
-            console.error('exchangeCodeForSession failed:', error.message);
-            sessionStorage.setItem(AUTH_ERROR_SESSION_KEY, error.message);
-          } else if (data?.session) {
-            handleSession(data.session);
-          }
-          // Clean code parameter from URL
-          const clean = new URL(window.location.href);
-          clean.searchParams.delete('code');
-          clean.searchParams.delete('authRole');
-          window.history.replaceState({}, document.title, clean.toString());
-        });
       }
     }
 
