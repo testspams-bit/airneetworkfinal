@@ -80,26 +80,64 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
       if (session?.user) {
         const u = session.user;
         const storedRole = localStorage.getItem('airneet-auth-role') as AccountRole | null;
+        const storedMode = localStorage.getItem('airneet-auth-mode') as 'login' | 'signup' | null;
         const pendingRegistration = localStorage.getItem('airneet-auth-registration');
         const savedRole = u.user_metadata?.air_neetwork_role as AccountRole | undefined;
 
-        // If the account is already registered with a different role, enforce role separation
-        if (savedRole && storedRole && savedRole !== storedRole) {
-          console.warn(`Role mismatch: user is registered as ${savedRole}, but attempted to sign in as ${storedRole}`);
-          void supabase.auth.signOut();
-          localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
-          localStorage.removeItem('airneet-auth-role');
-          localStorage.removeItem('airneet-auth-registration');
-          sessionStorage.setItem(
-            AUTH_ERROR_SESSION_KEY,
-            `This Google account is already registered as a ${savedRole === 'mentor' ? 'Mentor' : 'Student Mentee'}. Please sign in via the ${savedRole === 'mentor' ? 'Mentor' : 'Student'} portal, or select a different Google account.`
-          );
-          callback(null);
-          emitAuthChange(null);
-          return;
+        // MODE 1: LOG IN CHECKS
+        if (storedMode === 'login' && storedRole) {
+          // If no role exists in user metadata, they never registered!
+          if (!savedRole) {
+            console.warn('Login attempt with unregistered account:', u.email);
+            void supabase.auth.signOut();
+            localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
+            localStorage.removeItem('airneet-auth-role');
+            localStorage.removeItem('airneet-auth-mode');
+            sessionStorage.setItem(
+              AUTH_ERROR_SESSION_KEY,
+              `No ${storedRole === 'mentor' ? 'Mentor' : 'Student'} account found for ${u.email}. Please switch to the "Register" tab to create your ${storedRole === 'mentor' ? 'Mentor' : 'Student'} account first.`
+            );
+            callback(null);
+            emitAuthChange(null);
+            return;
+          }
+
+          // If role doesn't match the requested portal (e.g. Student trying to log into Mentor portal)
+          if (savedRole !== storedRole) {
+            console.warn(`Role mismatch: user is ${savedRole}, requested ${storedRole}`);
+            void supabase.auth.signOut();
+            localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
+            localStorage.removeItem('airneet-auth-role');
+            localStorage.removeItem('airneet-auth-mode');
+            sessionStorage.setItem(
+              AUTH_ERROR_SESSION_KEY,
+              `This account is registered as a ${savedRole === 'mentor' ? 'Mentor' : 'Student Mentee'}. Please switch to the ${savedRole === 'mentor' ? 'Mentor' : 'Student'} portal to sign in.`
+            );
+            callback(null);
+            emitAuthChange(null);
+            return;
+          }
         }
 
-        if (storedRole && !u.user_metadata?.air_neetwork_role) {
+        // MODE 2: REGISTER CHECKS
+        if (storedMode === 'signup' && storedRole) {
+          // If already registered with the OPPOSITE role
+          if (savedRole && savedRole !== storedRole) {
+            console.warn(`Cannot re-register ${savedRole} as ${storedRole}`);
+            void supabase.auth.signOut();
+            localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
+            localStorage.removeItem('airneet-auth-role');
+            localStorage.removeItem('airneet-auth-mode');
+            sessionStorage.setItem(
+              AUTH_ERROR_SESSION_KEY,
+              `This account is already registered as a ${savedRole === 'mentor' ? 'Mentor' : 'Student Mentee'}. You cannot register the same account as both. Please sign in via the ${savedRole === 'mentor' ? 'Mentor' : 'Student'} portal, or use another account.`
+            );
+            callback(null);
+            emitAuthChange(null);
+            return;
+          }
+
+          // Save new role to user metadata in Supabase
           let regData: Record<string, unknown> = {};
           if (pendingRegistration) {
             try {
@@ -108,27 +146,37 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
               // ignore
             }
           }
+
           void supabase.auth.updateUser({
             data: {
               air_neetwork_role: storedRole,
               ...regData,
             },
           });
-          localStorage.removeItem('airneet-auth-role');
-          localStorage.removeItem('airneet-auth-registration');
         }
 
-        const role = (savedRole || storedRole || 'student_mentee') as AccountRole;
+        // Compute authoritative role
+        // For registration: the explicitly selected role (mentor or student_mentee)
+        // For login: savedRole from metadata, or storedRole
+        const finalRole: AccountRole =
+          (storedMode === 'signup' && storedRole) ? storedRole : (savedRole || storedRole || 'student_mentee');
+
         const userData: AuthUserData = {
           id: u.id,
           email: u.email || '',
-          role,
+          role: finalRole,
           fullName: (u.user_metadata?.full_name as string) || (u.user_metadata?.name as string) || undefined,
           phone: (u.user_metadata?.contact_phone as string) || undefined,
           provider: session.user.app_metadata?.provider === 'google' ? 'google' : 'email',
         };
+
         localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(userData));
         callback(userData);
+
+        // Clean up pending tokens
+        localStorage.removeItem('airneet-auth-role');
+        localStorage.removeItem('airneet-auth-mode');
+        localStorage.removeItem('airneet-auth-registration');
       } else {
         localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
         callback(null);
@@ -228,7 +276,7 @@ export async function signUpWithEmail(params: {
       return {
         user: userData,
         message: data.session
-          ? 'Account created and signed in successfully!'
+          ? `Account created! Signed in as ${roleLabel(role)}.`
           : 'Account created! Please check your email to confirm your account.',
       };
     }
@@ -262,7 +310,7 @@ export async function signUpWithEmail(params: {
   localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(newUser));
   emitAuthChange(newUser);
 
-  return { user: newUser, message: 'Account registered and signed in successfully!' };
+  return { user: newUser, message: `Account registered! Signed in as ${roleLabel(role)}.` };
 }
 
 // Sign in with Email + Password
@@ -278,25 +326,35 @@ export async function signInWithEmail(params: {
       email: email.trim(),
       password,
     });
-    if (error) throw error;
+    if (error) {
+      if (error.message.toLowerCase().includes('invalid login credentials')) {
+        throw new Error(
+          `Invalid email or password. If you have not created your ${expectedRole === 'mentor' ? 'Mentor' : 'Student'} account yet, click the "Register" tab above.`
+        );
+      }
+      throw error;
+    }
     if (!data.user) throw new Error('Sign in failed. No user returned.');
 
     const savedRole = data.user.user_metadata?.air_neetwork_role;
-    if (savedRole && savedRole !== expectedRole) {
+    if (!savedRole) {
       await supabase.auth.signOut();
       throw new Error(
-        `This account is registered as ${savedRole === 'mentor' ? 'a Mentor' : 'a Student Mentee'}. Switch to ${savedRole === 'mentor' ? 'Mentor' : 'Student'} to sign in.`
+        `No ${expectedRole === 'mentor' ? 'Mentor' : 'Student'} account found for this email. Please switch to the "Register" tab to sign up first.`
       );
     }
 
-    if (!savedRole) {
-      await supabase.auth.updateUser({ data: { air_neetwork_role: expectedRole } });
+    if (savedRole !== expectedRole) {
+      await supabase.auth.signOut();
+      throw new Error(
+        `This account is registered as ${savedRole === 'mentor' ? 'a Mentor' : 'a Student Mentee'}. Switch to the ${savedRole === 'mentor' ? 'Mentor' : 'Student'} portal to sign in.`
+      );
     }
 
     const userData: AuthUserData = {
       id: data.user.id,
       email: data.user.email || email.trim(),
-      role: (savedRole || expectedRole) as AccountRole,
+      role: savedRole as AccountRole,
       fullName: (data.user.user_metadata?.full_name as string) || undefined,
       phone: (data.user.user_metadata?.contact_phone as string) || undefined,
       provider: 'email',
@@ -317,49 +375,39 @@ export async function signInWithEmail(params: {
   }
 
   const found = accounts.find((a) => a.email.toLowerCase() === email.trim().toLowerCase());
-  if (found) {
-    if (found.pass !== password) {
-      throw new Error('Incorrect password. Please try again.');
-    }
-    if (found.user.role !== expectedRole) {
-      throw new Error(
-        `This account is registered as ${found.user.role === 'mentor' ? 'a Mentor' : 'a Student Mentee'}. Please choose the matching account type.`
-      );
-    }
-    localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(found.user));
-    emitAuthChange(found.user);
-    return { user: found.user };
+  if (!found) {
+    throw new Error(
+      `No account found with this email. Please click the "Register" tab above to sign up as a ${expectedRole === 'mentor' ? 'Mentor' : 'Student'}.`
+    );
+  }
+  if (found.pass !== password) {
+    throw new Error('Incorrect password. Please try again.');
+  }
+  if (found.user.role !== expectedRole) {
+    throw new Error(
+      `This account is registered as ${found.user.role === 'mentor' ? 'a Mentor' : 'a Student Mentee'}. Please switch to the ${found.user.role === 'mentor' ? 'Mentor' : 'Student'} portal.`
+    );
   }
 
-  // If no previous account exists locally, create one smoothly to allow testing
-  const fallbackUser: AuthUserData = {
-    id: 'user_' + Math.random().toString(36).substring(2, 10),
-    email: email.trim(),
-    role: expectedRole,
-    fullName: email.split('@')[0],
-    provider: 'email',
-  };
-  accounts.push({ email: email.trim(), pass: password, user: fallbackUser });
-  localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts));
-  localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(fallbackUser));
-  emitAuthChange(fallbackUser);
-
-  return { user: fallbackUser };
+  localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(found.user));
+  emitAuthChange(found.user);
+  return { user: found.user };
 }
 
-// Sign in with Google
+// Sign in or Register with Google
 export async function signInWithGoogle(
   role: AccountRole,
-  extraData?: { fullName?: string; phone?: string; email?: string }
+  extraData?: { fullName?: string; phone?: string; email?: string },
+  authMode: 'login' | 'signup' = 'login'
 ): Promise<void> {
   if (supabase) {
     localStorage.setItem('airneet-auth-role', role);
+    localStorage.setItem('airneet-auth-mode', authMode);
     if (extraData) {
       localStorage.setItem('airneet-auth-registration', JSON.stringify(extraData));
     }
 
     // Clean redirect URL pointing to origin without query parameters
-    // Matches Supabase dashboard allowed Redirect URL list accurately
     const cleanRedirectUrl = window.location.origin + window.location.pathname;
 
     const { data, error } = await supabase.auth.signInWithOAuth({
@@ -373,18 +421,38 @@ export async function signInWithGoogle(
     });
     if (error) {
       localStorage.removeItem('airneet-auth-role');
+      localStorage.removeItem('airneet-auth-mode');
       localStorage.removeItem('airneet-auth-registration');
       throw error;
     }
     return;
   }
 
-  // Local Google OAuth simulation when Supabase credentials are not connected
+  // Local simulation
+  if (authMode === 'login') {
+    let accounts: Array<{ email: string; pass: string; user: AuthUserData }> = [];
+    try {
+      const raw = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
+      if (raw) accounts = JSON.parse(raw);
+    } catch {
+      accounts = [];
+    }
+    const found = accounts.find((a) => a.user.role === role);
+    if (!found) {
+      throw new Error(
+        `No ${role === 'mentor' ? 'Mentor' : 'Student'} account found. Please click 'Register' to sign up as a ${role === 'mentor' ? 'Mentor' : 'Student'} first.`
+      );
+    }
+    localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(found.user));
+    emitAuthChange(found.user);
+    return;
+  }
+
   const simulatedGoogleUser: AuthUserData = {
     id: 'google_' + Math.random().toString(36).substring(2, 10),
-    email: extraData?.email?.trim() || 'google.aspirant@gmail.com',
+    email: extraData?.email?.trim() || (role === 'mentor' ? 'mentor@gmail.com' : 'student@gmail.com'),
     role,
-    fullName: extraData?.fullName?.trim() || 'Google Aspirant',
+    fullName: extraData?.fullName?.trim() || (role === 'mentor' ? 'AIR Ranker Mentor' : 'NEET Student'),
     phone: extraData?.phone?.trim() || undefined,
     provider: 'google',
   };
@@ -397,6 +465,7 @@ export async function signInWithGoogle(
 export async function authSignOut(): Promise<void> {
   localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
   localStorage.removeItem('airneet-auth-role');
+  localStorage.removeItem('airneet-auth-mode');
   localStorage.removeItem('airneet-auth-registration');
   if (supabase) {
     try {

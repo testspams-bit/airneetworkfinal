@@ -137,11 +137,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     setAuthMessage(null);
     setIsSubmitting(true);
     try {
-      await signInWithGoogle(role, {
-        fullName: fullName.trim() || undefined,
-        phone: phone.trim() || undefined,
-        email: email.trim() || undefined,
-      });
+      await signInWithGoogle(
+        role,
+        {
+          fullName: fullName.trim() || undefined,
+          phone: phone.trim() || undefined,
+          email: email.trim() || undefined,
+        },
+        authMode
+      );
       setAuthMessage({ text: 'Google authentication successful! Signing in...', type: 'success' });
       window.setTimeout(onClose, 800);
     } catch (err) {
@@ -357,7 +361,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   d="M12 4.77c1.77 0 3.36.61 4.61 1.81l3.46-3.46C17.98 1.19 15.24 0 12 0A12 12 0 0 0 1.27 6.63l4 3.1c.95-2.85 3.6-4.96 6.73-4.96Z"
                 />
               </svg>
-              <span>Continue with Google</span>
+              <span>{authMode === 'signup' ? `Register with Google (${role === 'mentor' ? 'Mentor' : 'Student'})` : `Log in with Google (${role === 'mentor' ? 'Mentor' : 'Student'})`}</span>
             </button>
 
             {/* Divider */}
