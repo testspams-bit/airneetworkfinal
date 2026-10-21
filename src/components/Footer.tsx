@@ -18,7 +18,7 @@ export const Footer: React.FC<FooterProps> = ({ theme }) => {
           : 'bg-slate-50 border-slate-200 text-slate-500'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-[1560px] mx-auto px-4 sm:px-8 md:px-10">
         {/* Top Grid: Brand & Contact Info */}
         <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-10">
           {/* Brand Info */}

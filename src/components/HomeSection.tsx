@@ -290,23 +290,31 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ theme, onBookSession, 
                   <ImageIcon aria-hidden="true" className="home-image-card__icon" />
                   <span className="home-image-card__corner" />
                 </div>
+
+                {/* Navigation arrows placed directly on the card */}
+                <button
+                  type="button"
+                  className="home-image-card__nav home-image-card__nav--previous"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showPreviousImage();
+                  }}
+                  aria-label="Show previous image"
+                >
+                  <ChevronLeft aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="home-image-card__nav home-image-card__nav--next"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showNextImage();
+                  }}
+                  aria-label="Show next image"
+                >
+                  <ChevronRight aria-hidden="true" />
+                </button>
               </div>
-              <button
-                type="button"
-                className="home-gallery__slide-nav home-gallery__slide-nav--previous"
-                onClick={showPreviousImage}
-                aria-label="Show previous image"
-              >
-                <ChevronLeft aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className="home-gallery__slide-nav home-gallery__slide-nav--next"
-                onClick={showNextImage}
-                aria-label="Show next image"
-              >
-                <ChevronRight aria-hidden="true" />
-              </button>
             </div>
           </div>
           <div className="home-gallery__controls" role="group" aria-label="Slideshow controls">

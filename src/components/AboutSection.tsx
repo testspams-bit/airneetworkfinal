@@ -38,7 +38,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ theme }) => {
       className="grid flex-1 items-center gap-10 py-12 md:grid-cols-2 md:gap-14 md:py-16"
       aria-labelledby="about-title"
     >
-      <div className="max-w-xl">
+      <div className="max-w-2xl lg:max-w-3xl">
         {/* Title in air.neetwork font and Sentence Case */}
         <motion.h1
           id="about-title"

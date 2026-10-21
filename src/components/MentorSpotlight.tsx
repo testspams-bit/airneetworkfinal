@@ -45,7 +45,7 @@ export const MentorSpotlight: React.FC<MentorSpotlightProps> = ({
 
   return (
     <section id="mentors" className="py-24 relative border-t border-zinc-800">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-[1560px] mx-auto px-4 sm:px-8 md:px-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
             <div

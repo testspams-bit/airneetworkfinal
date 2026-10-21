@@ -99,13 +99,15 @@ export default function App() {
           : 'bg-white text-slate-900 selection:bg-[#0066FF] selection:text-white'
       }`}
     >
-      {/* Top Header / Navigation Bar */}
-      <header
-        className={`w-full sticky top-0 z-40 backdrop-blur-md transition-colors ${
-          isDark ? 'bg-[#080808]/90 border-b border-zinc-900' : 'bg-white/90 border-b border-slate-200 shadow-xs'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      {/* Top Header / Navigation Bar (Floating Island with Rounded Corners) */}
+      <header className="sticky top-0 z-40 w-full px-3 sm:px-6 md:px-8 pt-3 pb-1 transition-all">
+        <div
+          className={`max-w-[1560px] mx-auto px-4 sm:px-8 h-16 rounded-2xl md:rounded-3xl border backdrop-blur-xl transition-all duration-300 flex items-center justify-between gap-4 shadow-lg ${
+            isDark
+              ? 'bg-[#0a0a0c]/85 border-zinc-800/80 shadow-black/40 text-white'
+              : 'bg-white/90 border-slate-200/90 shadow-slate-200/50 text-slate-900'
+          }`}
+        >
           {/* Zone 1 (Left): Brand Logo & Wordmark */}
           <button
             type="button"
@@ -248,7 +250,7 @@ export default function App() {
       )}
 
       {/* Main Content Area - Full height so footer is hidden until scroll */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex-1 flex flex-col justify-between min-h-[calc(100vh-4rem)]">
+      <main className="max-w-[1560px] mx-auto px-4 sm:px-8 md:px-10 w-full flex-1 flex flex-col justify-between min-h-[calc(100vh-4rem)]">
         {activeNav === 'about' ? (
           <AboutSection theme={theme} />
         ) : activeNav === 'toppers' ? (

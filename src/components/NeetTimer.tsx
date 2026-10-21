@@ -136,7 +136,7 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 pt-2 pb-1.5 flex items-center justify-between gap-2.5 sm:gap-4 select-none">
+    <div className="w-full max-w-[1560px] mx-auto px-4 sm:px-8 md:px-10 pt-2 pb-1.5 flex items-center justify-between gap-2.5 sm:gap-4 select-none">
       {/* Extreme Left: Desktop Timer Box */}
       <div
         role="region"
