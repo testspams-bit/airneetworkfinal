@@ -81,6 +81,23 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
         const u = session.user;
         const storedRole = localStorage.getItem('airneet-auth-role') as AccountRole | null;
         const pendingRegistration = localStorage.getItem('airneet-auth-registration');
+        const savedRole = u.user_metadata?.air_neetwork_role as AccountRole | undefined;
+
+        // If the account is already registered with a different role, enforce role separation
+        if (savedRole && storedRole && savedRole !== storedRole) {
+          console.warn(`Role mismatch: user is registered as ${savedRole}, but attempted to sign in as ${storedRole}`);
+          void supabase.auth.signOut();
+          localStorage.removeItem(LOCAL_STORAGE_USER_KEY);
+          localStorage.removeItem('airneet-auth-role');
+          localStorage.removeItem('airneet-auth-registration');
+          sessionStorage.setItem(
+            AUTH_ERROR_SESSION_KEY,
+            `This Google account is already registered as a ${savedRole === 'mentor' ? 'Mentor' : 'Student Mentee'}. Please sign in via the ${savedRole === 'mentor' ? 'Mentor' : 'Student'} portal, or select a different Google account.`
+          );
+          callback(null);
+          emitAuthChange(null);
+          return;
+        }
 
         if (storedRole && !u.user_metadata?.air_neetwork_role) {
           let regData: Record<string, unknown> = {};
@@ -101,7 +118,7 @@ export function subscribeToAuth(callback: (user: AuthUserData | null) => void): 
           localStorage.removeItem('airneet-auth-registration');
         }
 
-        const role = (u.user_metadata?.air_neetwork_role || storedRole || 'student_mentee') as AccountRole;
+        const role = (savedRole || storedRole || 'student_mentee') as AccountRole;
         const userData: AuthUserData = {
           id: u.id,
           email: u.email || '',
@@ -349,6 +366,9 @@ export async function signInWithGoogle(
       provider: 'google',
       options: {
         redirectTo: cleanRedirectUrl,
+        queryParams: {
+          prompt: 'select_account',
+        },
       },
     });
     if (error) {
