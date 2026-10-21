@@ -349,10 +349,6 @@ export async function signInWithGoogle(
       provider: 'google',
       options: {
         redirectTo: cleanRedirectUrl,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        },
       },
     });
     if (error) {
