@@ -26,7 +26,7 @@ export const Hero: React.FC<HeroProps> = ({ theme, onOpenBooking }) => {
               {/* Sub-kicker in monospace */}
               <div
                 className={`text-xs font-mono font-bold tracking-widest uppercase mb-4 ${
-                  isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'
+                  isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'
                 }`}
               >
                 1-on-1 Strategic Mentorship · Class 11, 12 & Droppers
@@ -41,11 +41,11 @@ export const Hero: React.FC<HeroProps> = ({ theme, onOpenBooking }) => {
                 Cracking NEET <br />
                 Gets Better <br />
                 When You Have <br />
-                <span className={isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}>
+                <span className={isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'}>
                   An AIR Mentor
                 </span>{' '}
                 <br />
-                <span className={isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}>
+                <span className={isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'}>
                   To Talk To.
                 </span>
               </h1>
@@ -68,7 +68,7 @@ export const Hero: React.FC<HeroProps> = ({ theme, onOpenBooking }) => {
                   onClick={onOpenBooking}
                   className={`w-full sm:w-auto px-8 py-4 rounded-xl text-sm font-mono font-bold tracking-wider uppercase transition-all duration-200 flex items-center justify-center gap-3 active:scale-95 shadow-lg ${
                     isDark
-                      ? 'bg-[#CCFF00] text-black hover:bg-[#b8e600] shadow-[#CCFF00]/20'
+                      ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB] shadow-[#3B82F6]/25'
                       : 'bg-[#0066FF] text-white hover:bg-[#0052cc] shadow-[#0066FF]/25'
                   }`}
                 >
@@ -95,27 +95,27 @@ export const Hero: React.FC<HeroProps> = ({ theme, onOpenBooking }) => {
             <div
               className={`h-full min-h-[380px] rounded-3xl p-8 flex flex-col justify-between relative overflow-hidden transition-all border ${
                 isDark
-                  ? 'bg-[#CCFF00] text-black border-black/20 shadow-2xl'
+                  ? 'bg-zinc-900/90 text-white border-zinc-700 shadow-2xl'
                   : 'bg-slate-50 border-slate-200 text-slate-900 shadow-lg'
               }`}
             >
               {/* Top info row */}
               <div className="flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider">
                 <span>[ ALL INDIA RANK FRAMEWORK ]</span>
-                <span>NEET UG</span>
+                <span className={isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'}>NEET UG</span>
               </div>
 
               {/* Center Geometric Wireframe Illustration (matching reference) */}
               <div className="my-auto py-8 relative flex items-center justify-center">
                 <div
                   className={`w-48 h-48 sm:w-56 sm:h-56 relative border transition-transform hover:rotate-3 duration-300 ${
-                    isDark ? 'border-black' : 'border-[#0066FF]'
+                    isDark ? 'border-zinc-700' : 'border-[#0066FF]'
                   }`}
                 >
                   {/* Diagonal cross */}
                   <div
                     className={`absolute inset-0 border-t ${
-                      isDark ? 'border-black' : 'border-[#0066FF]'
+                      isDark ? 'border-zinc-700' : 'border-[#0066FF]'
                     }`}
                     style={{
                       transform: 'rotate(45deg)',
@@ -125,7 +125,7 @@ export const Hero: React.FC<HeroProps> = ({ theme, onOpenBooking }) => {
                   />
                   <div
                     className={`absolute inset-0 border-t ${
-                      isDark ? 'border-black' : 'border-[#0066FF]'
+                      isDark ? 'border-zinc-700' : 'border-[#0066FF]'
                     }`}
                     style={{
                       transform: 'rotate(-45deg)',
@@ -137,7 +137,7 @@ export const Hero: React.FC<HeroProps> = ({ theme, onOpenBooking }) => {
                   {/* Rotated inner solid dark box */}
                   <div
                     className={`absolute inset-4 transition-transform duration-500 hover:scale-105 flex items-center justify-center ${
-                      isDark ? 'bg-black text-[#CCFF00]' : 'bg-[#0066FF] text-white'
+                      isDark ? 'bg-black text-[#3B82F6] border border-blue-500/30' : 'bg-[#0066FF] text-white'
                     }`}
                     style={{ transform: 'rotate(-8deg)' }}
                   >
@@ -154,9 +154,9 @@ export const Hero: React.FC<HeroProps> = ({ theme, onOpenBooking }) => {
               </div>
 
               {/* Bottom Wireframe Caption (matching screenshot: 'A MARK FOR THE COMMONS') */}
-              <div className="flex items-center justify-between border-t pt-4 text-[11px] font-mono tracking-widest uppercase border-black/20">
+              <div className="flex items-center justify-between border-t pt-4 text-[11px] font-mono tracking-widest uppercase border-zinc-800 dark:border-zinc-800">
                 <span>AIIMS · MAMC · VMMC</span>
-                <span className="font-bold underline">A MARK FOR ALL INDIA RANK</span>
+                <span className="font-bold underline text-blue-400">A MARK FOR ALL INDIA RANK</span>
               </div>
             </div>
           </div>
@@ -174,7 +174,7 @@ export const Hero: React.FC<HeroProps> = ({ theme, onOpenBooking }) => {
             <div className="pt-3 md:pt-0">
               <div
                 className={`text-3xl sm:text-4xl font-extrabold tracking-tight font-mono mb-1 ${
-                  isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'
+                  isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'
                 }`}
               >
                 685+

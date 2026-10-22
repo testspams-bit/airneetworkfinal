@@ -73,7 +73,7 @@ export const SocialModal: React.FC<SocialModalProps> = ({
             rel="noopener noreferrer"
             className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border transition-all group ${
               isDark
-                ? 'bg-zinc-900/80 border-zinc-800 hover:border-[#CCFF00] hover:text-[#CCFF00]'
+                ? 'bg-zinc-900/80 border-zinc-800 hover:border-[#3B82F6] hover:text-[#60A5FA]'
                 : 'bg-slate-50 border-slate-200 hover:border-[#0066FF] hover:text-[#0066FF] hover:bg-white'
             }`}
           >
@@ -92,7 +92,7 @@ export const SocialModal: React.FC<SocialModalProps> = ({
             rel="noopener noreferrer"
             className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border transition-all group ${
               isDark
-                ? 'bg-zinc-900/80 border-zinc-800 hover:border-[#CCFF00] hover:text-[#CCFF00]'
+                ? 'bg-zinc-900/80 border-zinc-800 hover:border-[#3B82F6] hover:text-[#60A5FA]'
                 : 'bg-slate-50 border-slate-200 hover:border-[#0066FF] hover:text-[#0066FF] hover:bg-white'
             }`}
           >

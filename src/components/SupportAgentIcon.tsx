@@ -18,7 +18,7 @@ export const SupportAgentIcon = ({ theme, onOpenAIChat }: SupportAgentIconProps)
   const isDark = theme === 'dark';
   const actionStyle = `support-action absolute grid h-10 w-10 place-items-center rounded-full border shadow-lg transition-all duration-200 hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
     isDark
-      ? 'border-zinc-700 bg-[#17171b] text-white hover:bg-zinc-800 focus-visible:outline-[#CCFF00]'
+      ? 'border-zinc-700 bg-[#17171b] text-white hover:bg-zinc-800 focus-visible:outline-[#3B82F6]'
       : 'border-slate-200 bg-white text-slate-900 hover:bg-slate-50 focus-visible:outline-[#0066FF]'
   }`;
 
@@ -39,7 +39,7 @@ export const SupportAgentIcon = ({ theme, onOpenAIChat }: SupportAgentIconProps)
               aria-label="Open Chatbot"
               tabIndex={isOpen ? 0 : -1}
             >
-              <Icon className={`h-5 w-5 ${isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}`} aria-hidden="true" />
+              <Icon className={`h-5 w-5 ${isDark ? 'text-[#60A5FA]' : 'text-[#0066FF]'}`} aria-hidden="true" />
             </button>
           ) : (
             <a
@@ -52,7 +52,7 @@ export const SupportAgentIcon = ({ theme, onOpenAIChat }: SupportAgentIconProps)
               aria-label={kind === 'whatsapp' ? 'WhatsApp' : kind === 'email' ? 'Email' : 'Call'}
               tabIndex={isOpen ? 0 : -1}
             >
-              <Icon className={`h-5 w-5 ${kind === 'whatsapp' ? 'text-[#25D366]' : isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}`} aria-hidden="true" />
+              <Icon className={`h-5 w-5 ${kind === 'whatsapp' ? 'text-[#25D366]' : isDark ? 'text-[#60A5FA]' : 'text-[#0066FF]'}`} aria-hidden="true" />
             </a>
           )}
           <span
@@ -65,7 +65,7 @@ export const SupportAgentIcon = ({ theme, onOpenAIChat }: SupportAgentIconProps)
 
       <button
         type="button"
-        className={`support-agent support-agent--${theme} relative z-10 cursor-pointer transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 ${isDark ? 'focus-visible:outline-[#CCFF00]' : 'focus-visible:outline-[#0066FF]'}`}
+        className={`support-agent support-agent--${theme} relative z-10 cursor-pointer transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 ${isDark ? 'focus-visible:outline-[#3B82F6]' : 'focus-visible:outline-[#0066FF]'}`}
         onClick={() => setIsOpen((open) => !open)}
         aria-label={isOpen ? 'Close contact options' : 'Open contact options'}
         aria-expanded={isOpen}

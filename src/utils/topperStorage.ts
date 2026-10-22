@@ -234,6 +234,117 @@ export const DEFAULT_INITIAL_TOPPERS: TopperProfile[] = [
   },
 ];
 
+/**
+ * Helper to normalize names for resilient deduplication:
+ * - Trims and lowercases
+ * - Collapses whitespace
+ * - Strips honorifics (Dr., Mr., etc.)
+ * - Normalizes common phonetic transliteration variants (e.g., Chaithra/Chaitra, Soumya/Sumya)
+ */
+export function normalizeTopperName(name: string): string {
+  if (!name) return '';
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/^(dr\.?|mr\.?|ms\.?|mrs\.?)\s+/i, '')
+    .replace(/chaithra/g, 'chaitra')
+    .replace(/sumya/g, 'soumya');
+}
+
+/**
+ * Robustly checks if two topper profile records refer to the same human mentor:
+ * 1. Matches direct ID or claimedByUserId
+ * 2. Matches email address
+ * 3. Matches normalized full name
+ * 4. Matches AIR Rank with matching first name or overlapping name tokens
+ */
+export function isSameTopper(a: Partial<TopperProfile>, b: Partial<TopperProfile>): boolean {
+  if (!a || !b) return false;
+
+  // 1. Exact ID or claimed ID linkage
+  if (a.id && b.id && a.id === b.id) return true;
+  if (a.claimedByUserId && b.id && a.claimedByUserId === b.id) return true;
+  if (b.claimedByUserId && a.id && b.claimedByUserId === a.id) return true;
+  if (a.claimedByUserId && b.claimedByUserId && a.claimedByUserId === b.claimedByUserId) return true;
+
+  // 2. Email match
+  if (a.email && b.email && a.email.trim().toLowerCase() === b.email.trim().toLowerCase()) {
+    return true;
+  }
+
+  const normA = normalizeTopperName(a.name || '');
+  const normB = normalizeTopperName(b.name || '');
+
+  // 3. Normalized full name exact match
+  if (normA && normB && normA === normB) {
+    return true;
+  }
+
+  // 4. AIR Rank match + First Name match (e.g. AIR 04 / 4 and "Ayush")
+  const rankStrA = a.airRank ? String(a.airRank).replace(/\D/g, '') : '';
+  const rankStrB = b.airRank ? String(b.airRank).replace(/\D/g, '') : '';
+  const rankA = rankStrA ? parseInt(rankStrA, 10) : null;
+  const rankB = rankStrB ? parseInt(rankStrB, 10) : null;
+
+  if (rankA !== null && rankB !== null && rankA === rankB && rankA > 0) {
+    if (normA && normB) {
+      const firstA = normA.split(' ')[0];
+      const firstB = normB.split(' ')[0];
+      if (firstA && firstB && (firstA === firstB || normA.includes(firstB) || normB.includes(firstA))) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Deduplicates a list of topper profiles, keeping the single most accurate,
+ * complete, and photo-rich record per mentor.
+ */
+export function deduplicateTopperList(list: TopperProfile[]): TopperProfile[] {
+  const result: TopperProfile[] = [];
+
+  for (const item of list) {
+    const existingIndex = result.findIndex((existing) => isSameTopper(existing, item));
+    if (existingIndex === -1) {
+      result.push(item);
+    } else {
+      // Merge into the existing item without creating a duplicate card
+      const existing = result[existingIndex];
+      const isItemGenericAvatar =
+        !item.avatarUrl || AVATAR_PRESETS.some((preset) => preset.url === item.avatarUrl);
+      const isExistingGenericAvatar =
+        !existing.avatarUrl || AVATAR_PRESETS.some((preset) => preset.url === existing.avatarUrl);
+
+      // Preserve verified real photograph
+      const bestAvatar = !isExistingGenericAvatar
+        ? existing.avatarUrl
+        : !isItemGenericAvatar
+        ? item.avatarUrl
+        : existing.avatarUrl || item.avatarUrl;
+
+      result[existingIndex] = {
+        ...existing,
+        ...item,
+        // Keep verified seed id or user id cleanly
+        id: item.claimedByUserId || item.id || existing.id,
+        claimedByUserId: item.claimedByUserId || item.id || existing.claimedByUserId,
+        isClaimed: true,
+        avatarUrl: bestAvatar,
+        // Preserve phone/email if present
+        phone: item.phone || existing.phone,
+        email: item.email || existing.email,
+        bio: item.bio || existing.bio,
+      };
+    }
+  }
+
+  return result;
+}
+
 export function getInitialTopperProfile(userId: string, email?: string, name?: string): TopperProfile {
   const rateInfo = calculateSessionRateByAir('48');
   return {
@@ -267,6 +378,7 @@ export function loadTopperProfile(userId: string, fallbackEmail?: string, fallba
     return getInitialTopperProfile(userId, fallbackEmail, fallbackName);
   }
 
+  // 1. Check if user already has an explicit saved profile
   const saved = localStorage.getItem(TOPPER_PROFILE_KEY_PREFIX + userId);
   if (saved) {
     try {
@@ -282,6 +394,27 @@ export function loadTopperProfile(userId: string, fallbackEmail?: string, fallba
     }
   }
 
+  // 2. Intelligent Auto-Match: Check if this registering user matches ANY pre-created card
+  // (e.g. Ayush Bhalotia, Vanisha Satish, Soumya Bhadole, Chaithra, Ayush Prasad, Pree Sharma, Anushka)
+  const allToppers = getAllRegisteredToppers();
+  const matchedSeed = allToppers.find((t) =>
+    isSameTopper(t, { id: userId, email: fallbackEmail, name: fallbackName })
+  );
+
+  if (matchedSeed) {
+    const rateInfo = calculateSessionRateByAir(matchedSeed.airRank);
+    return {
+      ...matchedSeed,
+      id: userId,
+      claimedByUserId: userId,
+      isClaimed: true,
+      email: fallbackEmail || matchedSeed.email || '',
+      sessionRate: rateInfo.rate,
+      sessionRateDisplay: rateInfo.display,
+    };
+  }
+
+  // 3. Fallback to active session profile if available
   const generic = localStorage.getItem('airneet_topper_profile_active');
   if (generic) {
     try {
@@ -309,6 +442,8 @@ export function saveTopperProfile(profile: TopperProfile): void {
   const rateInfo = calculateSessionRateByAir(profile.airRank);
   const updatedProfile: TopperProfile = {
     ...profile,
+    claimedByUserId: profile.claimedByUserId || profile.id,
+    isClaimed: true,
     sessionRate: rateInfo.rate,
     sessionRateDisplay: rateInfo.display,
   };
@@ -316,19 +451,49 @@ export function saveTopperProfile(profile: TopperProfile): void {
   localStorage.setItem(TOPPER_PROFILE_KEY_PREFIX + updatedProfile.id, JSON.stringify(updatedProfile));
   localStorage.setItem('airneet_topper_profile_active', JSON.stringify(updatedProfile));
 
-  // Also sync into the global registered toppers list so it reflects in the "Toppers" navigation section
+  // Sync into the global registered toppers list with strict zero-duplicacy guarantee
   const all = getAllRegisteredToppers();
-  const existingIdx = all.findIndex((t) => t.id === updatedProfile.id || (t.email && t.email === updatedProfile.email));
+  const existingIdx = all.findIndex((t) => isSameTopper(t, updatedProfile));
+
   let updatedList: TopperProfile[];
   if (existingIdx >= 0) {
+    // Preserve verified high-res photo if newly registered mentor hasn't explicitly uploaded a new avatar
+    const existingCard = all[existingIdx];
+    const isExistingPhotoVerified =
+      existingCard.avatarUrl &&
+      !AVATAR_PRESETS.some((preset) => preset.url === existingCard.avatarUrl);
+    const isNewAvatarGenericPreset =
+      !updatedProfile.avatarUrl ||
+      AVATAR_PRESETS.some((preset) => preset.url === updatedProfile.avatarUrl);
+
+    const mergedProfile: TopperProfile = {
+      ...existingCard,
+      ...updatedProfile,
+      id: updatedProfile.id || existingCard.id,
+      claimedByUserId: updatedProfile.id || existingCard.id,
+      isClaimed: true,
+      avatarUrl:
+        isExistingPhotoVerified && isNewAvatarGenericPreset
+          ? existingCard.avatarUrl
+          : updatedProfile.avatarUrl || existingCard.avatarUrl,
+      isProfileComplete: true,
+    };
+
     updatedList = [...all];
-    updatedList[existingIdx] = updatedProfile;
+    updatedList[existingIdx] = mergedProfile;
+    // Filter out any other remnants matching this topper
+    updatedList = updatedList.filter(
+      (card, idx) => idx === existingIdx || !isSameTopper(card, mergedProfile)
+    );
   } else {
+    // Brand new mentor registering for the first time
     updatedList = [updatedProfile, ...all];
   }
 
-  localStorage.setItem(TOPPER_LIST_KEY, JSON.stringify(updatedList));
-  window.dispatchEvent(new CustomEvent('airneet_toppers_updated', { detail: updatedList }));
+  // Ensure whole list is strictly deduplicated
+  const finalizedList = deduplicateTopperList(updatedList);
+  localStorage.setItem(TOPPER_LIST_KEY, JSON.stringify(finalizedList));
+  window.dispatchEvent(new CustomEvent('airneet_toppers_updated', { detail: finalizedList }));
 }
 
 export function getAllRegisteredToppers(): TopperProfile[] {
@@ -341,22 +506,23 @@ export function getAllRegisteredToppers(): TopperProfile[] {
   try {
     const parsed = JSON.parse(raw) as TopperProfile[];
     if (Array.isArray(parsed) && parsed.length > 0) {
-      // Verify whether all 7 seeded toppers are present
-      const hasAyushPrasad = parsed.some((p) => p.id === 'topper_ayush_prasad');
+      // Clean up and ensure no duplicate cards exist
+      const deduplicated = deduplicateTopperList(parsed);
+
+      // Verify whether all 7 seeded toppers are present (if missing, safely backfill)
+      const hasAyushPrasad = deduplicated.some((p) => isSameTopper(p, { name: 'Ayush Prasad', airRank: '200' }));
       if (!hasAyushPrasad) {
-        // Keep any custom user-registered topper profiles while refreshing default toppers
-        const defaultIds = [
-          'topper_aryan', 'topper_sneha', 'topper_rohan',
-          'topper_ayush', 'topper_vanisha', 'topper_soumya', 'topper_chaitra',
-          'topper_ayush_prasad', 'topper_pree_sharma', 'topper_anushka'
-        ];
-        const customProfiles = parsed.filter((p) => !defaultIds.includes(p.id));
-        const refreshedList = [...DEFAULT_INITIAL_TOPPERS, ...customProfiles];
-        localStorage.setItem(TOPPER_LIST_KEY, JSON.stringify(refreshedList));
-        return refreshedList;
+        const mergedWithDefaults = deduplicateTopperList([...deduplicated, ...DEFAULT_INITIAL_TOPPERS]);
+        localStorage.setItem(TOPPER_LIST_KEY, JSON.stringify(mergedWithDefaults));
+        return mergedWithDefaults;
       }
 
-      return parsed.map((p) => {
+      // If deduplication removed any duplicate records, persist the clean state
+      if (deduplicated.length !== parsed.length) {
+        localStorage.setItem(TOPPER_LIST_KEY, JSON.stringify(deduplicated));
+      }
+
+      return deduplicated.map((p) => {
         const rateInfo = calculateSessionRateByAir(p.airRank);
         return {
           ...p,

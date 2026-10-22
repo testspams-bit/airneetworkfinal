@@ -37,6 +37,8 @@ import {
   AVATAR_PRESETS,
   STANDARD_SLOTS,
   getNextMonthDays,
+  getAllRegisteredToppers,
+  isSameTopper,
 } from '../utils/topperStorage.ts';
 
 interface TopperProfileOnboardingModalProps {
@@ -127,6 +129,12 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
   const filteredInstitutes = TOP_COACHING_INSTITUTES.filter((inst) =>
     inst.toLowerCase().includes(coachingSearch.toLowerCase())
   );
+
+  // Check if name or initialProfile matches an existing verified card in the database
+  const matchedVerifiedCard = React.useMemo(() => {
+    const all = getAllRegisteredToppers();
+    return all.find((t) => isSameTopper(t, { name, email: initialProfile.email, id: initialProfile.id }));
+  }, [name, initialProfile]);
 
   const validatePage1 = () => {
     if (!name.trim()) {
@@ -260,13 +268,13 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
         {/* Modal Header */}
         <div className="flex items-center justify-between pb-4 border-b border-zinc-800/80 mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-gradient-to-tr from-amber-500 to-[#CCFF00] text-black font-black shadow-sm">
-              <Trophy className="w-5 h-5 text-black" />
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-gradient-to-tr from-blue-600 to-sky-400 text-white font-black shadow-sm">
+              <Trophy className="w-5 h-5 text-white" />
             </div>
             <div>
               <div
                 className={`text-[10px] font-mono uppercase tracking-widest font-bold ${
-                  isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'
+                  isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'
                 }`}
               >
                 AIR NEETwork · Ranker Onboarding
@@ -411,10 +419,62 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                 required
                 className={`w-full px-4 py-2.5 rounded-xl border text-sm font-medium focus:outline-none transition-all ${
                   isDark
-                    ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                    ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#3B82F6]'
                     : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                 }`}
               />
+
+              {/* Verified AIR card detected notification & 1-click sync */}
+              {matchedVerifiedCard && (
+                <div
+                  className={`mt-2.5 p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition-all ${
+                    isDark
+                      ? 'bg-emerald-950/25 border-emerald-500/40 text-emerald-200'
+                      : 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span className="text-xs">
+                      <strong>Verified AIR Card Linked:</strong> {matchedVerifiedCard.name} (AIR {matchedVerifiedCard.airRank} · {matchedVerifiedCard.currentCollege})
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 uppercase tracking-wider font-bold">
+                      Zero Duplicates
+                    </span>
+                    {matchedVerifiedCard.name !== name && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setName(matchedVerifiedCard.name);
+                          if (matchedVerifiedCard.avatarUrl) setAvatarUrl(matchedVerifiedCard.avatarUrl);
+                          if (matchedVerifiedCard.currentCollege) setCurrentCollege(matchedVerifiedCard.currentCollege);
+                          if (matchedVerifiedCard.airRank) setAirRank(matchedVerifiedCard.airRank);
+                          if (matchedVerifiedCard.subjectWiseMarks) {
+                            setPhysicsMarks(matchedVerifiedCard.subjectWiseMarks.physics);
+                            setChemistryMarks(matchedVerifiedCard.subjectWiseMarks.chemistry);
+                            setBiologyMarks(matchedVerifiedCard.subjectWiseMarks.biology);
+                          }
+                          if (matchedVerifiedCard.coachingName) {
+                            setSelectedCoaching(
+                              TOP_COACHING_INSTITUTES.includes(matchedVerifiedCard.coachingName)
+                                ? matchedVerifiedCard.coachingName
+                                : 'Other (Enter Custom Institute)'
+                            );
+                            if (!TOP_COACHING_INSTITUTES.includes(matchedVerifiedCard.coachingName)) {
+                              setCustomCoachingName(matchedVerifiedCard.coachingName);
+                            }
+                          }
+                        }}
+                        className="text-[11px] font-bold underline cursor-pointer hover:opacity-80"
+                      >
+                        Auto-fill Verified Details
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Field 2: Profile Picture / Avatar Presets */}
@@ -426,6 +486,35 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
               >
                 2. Profile Picture / Avatar *
               </label>
+
+              {/* Verified Sourced Photo Preview if active */}
+              {avatarUrl && !AVATAR_PRESETS.some((preset) => preset.url === avatarUrl) && (
+                <div
+                  className={`mb-3.5 p-3 rounded-2xl border flex items-center justify-between gap-3 ${
+                    isDark ? 'bg-zinc-900/80 border-zinc-800' : 'bg-slate-50 border-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={avatarUrl}
+                      alt="Verified profile avatar"
+                      className="w-12 h-12 rounded-xl object-cover object-top border-2 border-emerald-500 shadow-sm"
+                    />
+                    <div>
+                      <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Verified Photograph Active
+                      </div>
+                      <div className="text-[10px] text-zinc-400 mt-0.5">
+                        Your official photograph from the cards is preserved. You can keep this or select an avatar below.
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 uppercase tracking-wider font-bold shrink-0">
+                    Preserved
+                  </span>
+                </div>
+              )}
+
               <p className={`text-xs mb-3 ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
                 Choose an official medical avatar to display on your mentor spotlight card.
               </p>
@@ -438,7 +527,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                     className={`relative rounded-2xl p-1 border-2 transition-all cursor-pointer overflow-hidden group ${
                       avatarUrl === av.url
                         ? isDark
-                          ? 'border-[#CCFF00] scale-105 shadow-md shadow-[#CCFF00]/20'
+                          ? 'border-[#3B82F6] scale-105 shadow-md shadow-[#3B82F6]/20'
                           : 'border-[#0066FF] scale-105 shadow-md shadow-[#0066FF]/20'
                         : isDark
                         ? 'border-zinc-800 hover:border-zinc-600'
@@ -451,7 +540,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                       className="w-full aspect-square object-cover rounded-xl"
                     />
                     {avatarUrl === av.url && (
-                      <div className="absolute top-1 right-1 bg-[#CCFF00] text-black p-0.5 rounded-full">
+                      <div className="absolute top-1 right-1 bg-[#3B82F6] text-white p-0.5 rounded-full">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </div>
                     )}
@@ -479,7 +568,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                       className={`py-2 px-3 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer ${
                         gender === g
                           ? isDark
-                            ? 'bg-[#CCFF00] text-black border-[#CCFF00]'
+                            ? 'bg-[#3B82F6] text-white border-[#3B82F6]'
                             : 'bg-[#0066FF] text-white border-[#0066FF]'
                           : isDark
                           ? 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-zinc-500'
@@ -514,7 +603,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                       className={`py-2 px-2 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer ${
                         language === l.val
                           ? isDark
-                            ? 'bg-[#CCFF00] text-black border-[#CCFF00]'
+                            ? 'bg-[#3B82F6] text-white border-[#3B82F6]'
                             : 'bg-[#0066FF] text-white border-[#0066FF]'
                           : isDark
                           ? 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-zinc-500'
@@ -550,7 +639,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                 required
                 className={`w-full px-4 py-2.5 rounded-xl border text-sm font-medium focus:outline-none transition-all mb-2 ${
                   isDark
-                    ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                    ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#3B82F6]'
                     : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                 }`}
               />
@@ -594,7 +683,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                 placeholder="+91 98765 43210"
                 className={`w-full px-4 py-2.5 rounded-xl border text-sm font-medium focus:outline-none transition-all ${
                   isDark
-                    ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                    ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#3B82F6]'
                     : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                 }`}
               />
@@ -611,7 +700,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                 }}
                 className={`px-6 py-3 rounded-xl font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 ${
                   isDark
-                    ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                    ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                     : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
                 }`}
               >
@@ -655,7 +744,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                   }`}
                 >
                   <div className="text-[10px] uppercase font-bold text-zinc-400">Fixed Rate</div>
-                  <div className="text-base font-black text-[#CCFF00]">{calculatedRate.display}</div>
+                  <div className="text-base font-black text-[#60A5FA]">{calculatedRate.display}</div>
                   <div className="text-[9px] opacity-75">/ 1-on-1 session</div>
                 </div>
               </div>
@@ -706,7 +795,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                       className={`py-2 px-2 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer ${
                         yearOfNeet === y
                           ? isDark
-                            ? 'bg-[#CCFF00] text-black border-[#CCFF00]'
+                            ? 'bg-[#3B82F6] text-white border-[#3B82F6]'
                             : 'bg-[#0066FF] text-white border-[#0066FF]'
                           : isDark
                           ? 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-zinc-500'
@@ -737,7 +826,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                       className={`py-2 px-1 text-center rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer ${
                         numberOfAttempts === att
                           ? isDark
-                            ? 'bg-[#CCFF00] text-black border-[#CCFF00]'
+                            ? 'bg-[#3B82F6] text-white border-[#3B82F6]'
                             : 'bg-[#0066FF] text-white border-[#0066FF]'
                           : isDark
                           ? 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-zinc-500'
@@ -783,7 +872,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                     onChange={(e) => setPhysicsMarks(Number(e.target.value))}
                     className={`w-full px-3 py-2 rounded-xl border text-sm font-mono font-bold focus:outline-none ${
                       isDark
-                        ? 'bg-zinc-900 border-zinc-700 text-white focus:border-[#CCFF00]'
+                        ? 'bg-zinc-900 border-zinc-700 text-white focus:border-[#3B82F6]'
                         : 'bg-white border-slate-300 text-slate-900 focus:border-[#0066FF]'
                     }`}
                   />
@@ -801,7 +890,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                     onChange={(e) => setChemistryMarks(Number(e.target.value))}
                     className={`w-full px-3 py-2 rounded-xl border text-sm font-mono font-bold focus:outline-none ${
                       isDark
-                        ? 'bg-zinc-900 border-zinc-700 text-white focus:border-[#CCFF00]'
+                        ? 'bg-zinc-900 border-zinc-700 text-white focus:border-[#3B82F6]'
                         : 'bg-white border-slate-300 text-slate-900 focus:border-[#0066FF]'
                     }`}
                   />
@@ -819,7 +908,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                     onChange={(e) => setBiologyMarks(Number(e.target.value))}
                     className={`w-full px-3 py-2 rounded-xl border text-sm font-mono font-bold focus:outline-none ${
                       isDark
-                        ? 'bg-zinc-900 border-zinc-700 text-white focus:border-[#CCFF00]'
+                        ? 'bg-zinc-900 border-zinc-700 text-white focus:border-[#3B82F6]'
                         : 'bg-white border-slate-300 text-slate-900 focus:border-[#0066FF]'
                     }`}
                   />
@@ -846,7 +935,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                       className={`py-2 px-2 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer ${
                         coachingMode === mode
                           ? isDark
-                            ? 'bg-[#CCFF00] text-black border-[#CCFF00]'
+                            ? 'bg-[#3B82F6] text-white border-[#3B82F6]'
                             : 'bg-[#0066FF] text-white border-[#0066FF]'
                           : isDark
                           ? 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-zinc-500'
@@ -938,7 +1027,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                       required
                       className={`w-full px-4 py-2 rounded-xl border text-sm font-medium focus:outline-none ${
                         isDark
-                          ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                          ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#3B82F6]'
                           : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                       }`}
                     />
@@ -962,7 +1051,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                   placeholder="e.g. Scored 175/180 in Physics. Specializes in solving mechanics numericals under timed pressure, active NCERT revision, and eliminating silly mistakes."
                   className={`w-full px-4 py-2.5 rounded-xl border text-xs leading-relaxed focus:outline-none transition-all ${
                     isDark
-                      ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                      ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#3B82F6]'
                       : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                   }`}
                 />
@@ -990,7 +1079,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                 }}
                 className={`px-6 py-3 rounded-xl font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 ${
                   isDark
-                    ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                    ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                     : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
                 }`}
               >
@@ -1028,7 +1117,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                   }`}
                 >
                   <div className="text-[10px] uppercase font-bold text-zinc-400">Total Active Slots</div>
-                  <div className="text-xl font-black text-[#CCFF00]">{totalActiveSlots} Slots</div>
+                  <div className="text-xl font-black text-[#60A5FA]">{totalActiveSlots} Slots</div>
                   <div className="text-[9px] opacity-75">Next 30 Days</div>
                 </div>
               </div>
@@ -1078,7 +1167,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                         : 'bg-white border-slate-200 hover:border-[#0066FF] hover:bg-slate-50 shadow-xs'
                     }`}
                   >
-                    <div className="text-xs font-bold font-mono text-[#CCFF00]">{preset.name}</div>
+                    <div className="text-xs font-bold font-mono text-[#60A5FA]">{preset.name}</div>
                     <div className={`text-[11px] mt-0.5 ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
                       {preset.desc}
                     </div>
@@ -1113,7 +1202,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                       className={`py-3 px-1 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer text-center ${
                         isSelected
                           ? isDark
-                            ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-sm'
+                            ? 'bg-[#3B82F6] text-white border-[#3B82F6] shadow-sm'
                             : 'bg-[#0066FF] text-white border-[#0066FF] shadow-sm'
                           : isDark
                           ? 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700'
@@ -1161,7 +1250,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                       }`}
                     >
                       <span className="truncate">{slot.label}</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 shrink-0 ml-1 text-[#CCFF00]" />}
+                      {isSelected && <Check className="w-3.5 h-3.5 shrink-0 ml-1 text-[#60A5FA]" />}
                     </button>
                   );
                 })}
@@ -1247,7 +1336,7 @@ export const TopperProfileOnboardingModal: React.FC<TopperProfileOnboardingModal
                 onClick={handleFinalFinish}
                 className={`px-6 py-3.5 rounded-xl font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95 ${
                   isDark
-                    ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                    ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                     : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
                 }`}
               >

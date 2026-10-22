@@ -120,7 +120,7 @@ export const GetInTouchModal: React.FC<GetInTouchModalProps> = ({
                 href="tel:+919876543210"
                 aria-label="Call us"
                 title="Call"
-                className={`flex cursor-pointer flex-col items-center gap-1.5 p-2 transition-transform hover:scale-110 ${isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}`}
+                className={`flex cursor-pointer flex-col items-center gap-1.5 p-2 transition-transform hover:scale-110 ${isDark ? 'text-[#60A5FA]' : 'text-[#0066FF]'}`}
               >
                 <Phone className="h-8 w-8" aria-hidden="true" />
                 <span className="text-base font-semibold">Call</span>
@@ -139,7 +139,7 @@ export const GetInTouchModal: React.FC<GetInTouchModalProps> = ({
                 onClick={() => setView('callback-form')}
                 className={`w-full py-3 px-4 rounded-xl text-sm font-bold font-mono flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
                   isDark
-                    ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33] active:scale-98'
+                    ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB] active:scale-98'
                     : 'bg-[#0066FF] text-white hover:bg-[#0052cc] active:scale-98'
                 }`}
               >
@@ -183,7 +183,7 @@ export const GetInTouchModal: React.FC<GetInTouchModalProps> = ({
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className={`w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-none ${
                     isDark
-                      ? 'bg-zinc-900/90 border-zinc-800 text-white focus:border-[#CCFF00]'
+                      ? 'bg-zinc-900/90 border-zinc-800 text-white focus:border-[#3B82F6]'
                       : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#0066FF]'
                   }`}
                 />
@@ -201,7 +201,7 @@ export const GetInTouchModal: React.FC<GetInTouchModalProps> = ({
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   className={`w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-none ${
                     isDark
-                      ? 'bg-zinc-900/90 border-zinc-800 text-white focus:border-[#CCFF00]'
+                      ? 'bg-zinc-900/90 border-zinc-800 text-white focus:border-[#3B82F6]'
                       : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#0066FF]'
                   }`}
                 />
@@ -261,7 +261,7 @@ export const GetInTouchModal: React.FC<GetInTouchModalProps> = ({
                   onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                   className={`w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-none resize-none ${
                     isDark
-                      ? 'bg-zinc-900/90 border-zinc-800 text-white focus:border-[#CCFF00]'
+                      ? 'bg-zinc-900/90 border-zinc-800 text-white focus:border-[#3B82F6]'
                       : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#0066FF]'
                   }`}
                 />
@@ -272,7 +272,7 @@ export const GetInTouchModal: React.FC<GetInTouchModalProps> = ({
                 disabled={isSubmitting}
                 className={`w-full py-2.5 rounded-xl text-xs font-bold font-mono uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer mt-3 ${
                   isDark
-                    ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                    ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                     : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
                 }`}
               >

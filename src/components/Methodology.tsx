@@ -43,7 +43,7 @@ export const Methodology: React.FC<MethodologyProps> = ({ theme, onOpenBooking }
         <div className="max-w-3xl mb-16">
           <div
             className={`text-xs font-mono font-bold tracking-widest uppercase mb-3 ${
-              isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'
+              isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'
             }`}
           >
             [ THE AIR NEETWORK BLUEPRINT ]
@@ -82,13 +82,13 @@ export const Methodology: React.FC<MethodologyProps> = ({ theme, onOpenBooking }
                     <span
                       className={`text-xs font-mono font-bold tracking-wider px-2.5 py-1 rounded ${
                         isDark
-                          ? 'bg-zinc-900 text-[#CCFF00] border border-zinc-800'
+                          ? 'bg-zinc-900 text-[#60A5FA] border border-zinc-800'
                           : 'bg-slate-100 text-[#0066FF]'
                       }`}
                     >
                       PILLAR {step.num}
                     </span>
-                    <Icon className={`w-5 h-5 ${isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}`} />
+                    <Icon className={`w-5 h-5 ${isDark ? 'text-[#60A5FA]' : 'text-[#0066FF]'}`} />
                   </div>
 
                   <h3
@@ -121,7 +121,7 @@ export const Methodology: React.FC<MethodologyProps> = ({ theme, onOpenBooking }
                     onClick={onOpenBooking}
                     className={`text-xs font-mono font-semibold flex items-center gap-1 transition-colors ${
                       isDark
-                        ? 'text-[#CCFF00] hover:underline'
+                        ? 'text-[#60A5FA] hover:underline'
                         : 'text-[#0066FF] hover:underline'
                     }`}
                   >

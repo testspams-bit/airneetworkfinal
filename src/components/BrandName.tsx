@@ -12,7 +12,7 @@ export const BrandName: React.FC<BrandNameProps> = ({
   return (
     <span className={`font-black lowercase tracking-tight inline-flex items-baseline ${className}`}>
       <span>air.</span>
-      <span className={theme === 'dark' ? 'text-[#CCFF00]' : 'text-[#0066FF]'}>
+      <span className={theme === 'dark' ? 'text-[#3B82F6]' : 'text-[#0066FF]'}>
         neet
       </span>
       <span>work</span>

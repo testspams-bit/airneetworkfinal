@@ -264,7 +264,7 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
           onClick={() => setIsPledgeOpen(true)}
           className={`inline-flex items-center gap-1.5 rounded-xl border px-2.5 sm:px-3 py-1.5 font-mono text-[10px] sm:text-xs font-bold transition-all duration-200 active:scale-95 ${
             isDark
-              ? 'border-[#CCFF00]/45 bg-[#CCFF00]/10 text-[#CCFF00] hover:border-[#CCFF00] hover:bg-[#CCFF00]/15 hover:shadow-[0_0_16px_rgba(204,255,0,0.18)]'
+              ? 'border-[#3B82F6]/45 bg-[#3B82F6]/10 text-[#60A5FA] hover:border-[#3B82F6] hover:bg-[#3B82F6]/15 hover:shadow-[0_0_16px_rgba(59,130,246,0.25)]'
               : 'border-blue-300 bg-blue-50 text-blue-800 hover:border-blue-400 hover:bg-blue-100'
           }`}
           aria-label="Take the NEET pledge"
@@ -324,10 +324,10 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
             >
               <X className="h-4 w-4" />
             </button>
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#CCFF00]/10 text-[#CCFF00]">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#3B82F6]/10 text-[#60A5FA]">
               <HandHeart className="h-6 w-6" />
             </div>
-            <p className={`mb-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] ${isDark ? 'text-[#CCFF00]' : 'text-blue-700'}`}>AIR NEETwork</p>
+            <p className={`mb-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] ${isDark ? 'text-[#60A5FA]' : 'text-blue-700'}`}>AIR NEETwork</p>
             <h2 id="neet-pledge-title" className="mb-3 text-2xl font-black">My NEET pledge</h2>
             <p className={`mb-6 text-sm leading-relaxed ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
               I pledge to show up consistently, learn from every mistake, and prepare with honesty and care for my wellbeing. My progress is built one focused day at a time.
@@ -335,7 +335,7 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
             <button
               type="button"
               onClick={() => setIsPledgeOpen(false)}
-              className="w-full rounded-xl bg-[#CCFF00] px-4 py-3 font-mono text-sm font-black text-black transition hover:bg-[#d8ff33] active:scale-[0.99]"
+              className="w-full rounded-xl bg-[#3B82F6] px-4 py-3 font-mono text-sm font-black text-white transition hover:bg-[#2563EB] active:scale-[0.99]"
             >
               I take the pledge
             </button>

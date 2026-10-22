@@ -49,7 +49,7 @@
 }
 
 .desktop-nav-button--active-dark::after {
-  background: #ccff00;
+  background: #3b82f6;
 }
 
 .desktop-nav-button--active-light::after {
@@ -139,7 +139,7 @@
 }
 
 .support-agent {
-  --support-accent: #ccff00;
+  --support-accent: #3b82f6;
   position: relative;
   z-index: 1;
   display: grid;
@@ -148,10 +148,10 @@
   place-items: center;
   overflow: visible;
   isolation: isolate;
-  border: 1px solid rgb(204 255 0 / 0.55);
+  border: 1px solid rgb(59 130 246 / 0.55);
   border-radius: 50%;
   background: var(--support-accent);
-  color: #080808;
+  color: #ffffff;
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.3);
 }
 
@@ -184,7 +184,7 @@
 }
 
 .support-agent--dark {
-  --support-accent: #ccff00;
+  --support-accent: #3b82f6;
 }
 
 .support-agent--light {
@@ -259,12 +259,12 @@
 }
 
 .home-content {
-  --home-accent: #ccff00;
-  --home-surface: #11120c;
-  --home-panel: #171911;
+  --home-accent: #3b82f6;
+  --home-surface: #0a0d14;
+  --home-panel: #111622;
   --home-line: rgb(255 255 255 / 0.13);
-  --home-text: #f3f3e9;
-  --home-muted: #a3a697;
+  --home-text: #f8fafc;
+  --home-muted: #94a3b8;
   width: 100%;
   padding: 42px 0 68px;
   color: var(--home-text);
@@ -285,15 +285,15 @@
 }
 
 .session-followthrough {
-  --session-accent: #ccff00;
+  --session-accent: #3b82f6;
   --session-line: rgb(255 255 255 / 0.13);
   --session-panel: rgb(255 255 255 / 0.035);
-  --session-muted: #a3a697;
+  --session-muted: #94a3b8;
   width: 100%;
   margin: 0 auto;
   padding: 42px 0 58px;
   border-top: 1px solid var(--session-line);
-  color: #f3f3e9;
+  color: #f8fafc;
 }
 
 .session-followthrough[data-theme="light"] {
@@ -568,7 +568,7 @@
 .home-intro__action--primary {
   border-color: var(--home-accent);
   background: var(--home-accent);
-  color: #10130a;
+  color: #ffffff;
 }
 
 .home-intro__stats-note {
@@ -1322,7 +1322,7 @@
 .home-tier-card:hover::before { opacity: 0.2; transform: scale(1.18); }
 .home-tier-card--diamond { --tier-glow: #c6a7ff; }
 .home-tier-card--elite { --tier-glow: #68c8ff; }
-.home-tier-card--prime { --tier-glow: #ccff00; }
+.home-tier-card--prime { --tier-glow: #3b82f6; }
 .home-tier-card--elite { border-color: color-mix(in srgb, var(--tier-glow) 44%, var(--home-line)); background: linear-gradient(145deg, color-mix(in srgb, var(--tier-glow) 15%, var(--home-panel)), var(--home-panel) 72%); }
 .home-tier-card--elite:hover { box-shadow: 0 0 0 1px color-mix(in srgb, var(--tier-glow) 28%, transparent), 0 14px 32px rgb(0 0 0 / 0.2), 0 0 34px color-mix(in srgb, var(--tier-glow) 27%, transparent); }
 .home-content--light .home-tier-card--diamond { --tier-glow: #7451c8; }
@@ -1337,7 +1337,7 @@
 .home-tier-card__details p { margin: 0; font-size: 13px; font-weight: 550; letter-spacing: -.01em; }
 .home-tier-card__stat { display: flex; align-items: center; gap: 6px; margin-top: 4px; color: var(--home-muted); font-size: 10px; }
 .home-tier-card__stat strong { color: var(--tier-glow); font-size: 11px; }
-.home-tier-card__price-bar { display: flex; width: fit-content; align-items: center; justify-content: flex-start; gap: 12px; min-height: 36px; margin-top: 6px; padding: 6px 12px; border: 1px solid color-mix(in srgb, var(--home-accent) 25%, transparent); border-radius: 8px; background: var(--home-accent); color: #10130a; }
+.home-tier-card__price-bar { display: flex; width: fit-content; align-items: center; justify-content: flex-start; gap: 12px; min-height: 36px; margin-top: 6px; padding: 6px 12px; border: 1px solid color-mix(in srgb, var(--home-accent) 25%, transparent); border-radius: 8px; background: var(--home-accent); color: #ffffff; }
 .home-content--light .home-tier-card__price-bar { color: #fff; }
 .home-tier-card__price-bar strong { font-family: "Space Grotesk", sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -.06em; line-height: 1; }
 .home-tier-card__price-bar small { margin-right: 2px; font-size: .62em; vertical-align: .2em; }
@@ -1391,7 +1391,7 @@
 .home-tier-dialog { --tier-glow: var(--home-accent); position: relative; width: min(440px, 100%); padding: 30px; border: 1px solid color-mix(in srgb, var(--tier-glow) 38%, var(--home-line)); border-radius: 16px; background: radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--tier-glow) 13%, transparent), transparent 55%), var(--home-panel); color: var(--home-text); box-shadow: 0 24px 80px rgb(0 0 0 / .42); animation: tier-dialog-in 260ms cubic-bezier(.2,.8,.2,1) both; }
 .home-tier-dialog--diamond { --tier-glow: #c6a7ff; }
 .home-tier-dialog--elite { --tier-glow: #68c8ff; }
-.home-tier-dialog--prime { --tier-glow: #ccff00; }
+.home-tier-dialog--prime { --tier-glow: #3b82f6; }
 .home-content--light .home-tier-dialog--diamond { --tier-glow: #7451c8; }
 .home-content--light .home-tier-dialog--elite { --tier-glow: #0875b9; }
 .home-content--light .home-tier-dialog--prime { --tier-glow: #557a00; }
@@ -1407,7 +1407,7 @@
 .home-tier-dialog__actions { display: grid; gap: 9px; margin-top: 18px; }
 .home-tier-dialog__actions button { display: flex; min-height: 46px; align-items: center; justify-content: center; gap: 8px; border-radius: 10px; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; cursor: pointer; transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease; }
 .home-tier-dialog__actions button:hover { transform: translateY(-2px); }
-.home-tier-dialog__book { border: 1px solid var(--home-accent); background: var(--home-accent); color: #10130a; }
+.home-tier-dialog__book { border: 1px solid var(--home-accent); background: var(--home-accent); color: #ffffff; }
 .home-content--light .home-tier-dialog__book { color: white; }
 .home-tier-dialog__mentors { border: 1px solid var(--home-line); background: transparent; color: var(--home-text); }
 .home-tier-dialog__mentors svg { width: 15px; height: 15px; color: var(--tier-glow); }
@@ -1431,8 +1431,8 @@
 
 .about-vision-card:hover {
   transform: translateY(-4px);
-  border-color: var(--home-accent, #ccff00);
-  box-shadow: 0 12px 28px rgb(0 0 0 / 0.16), 0 0 20px color-mix(in srgb, var(--home-accent, #ccff00) 24%, transparent);
+  border-color: var(--home-accent, #3b82f6);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 0.16), 0 0 20px color-mix(in srgb, var(--home-accent, #3b82f6) 24%, transparent);
 }
 
 .home-rate-card__top,

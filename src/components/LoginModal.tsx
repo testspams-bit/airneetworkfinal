@@ -28,6 +28,7 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onMentorSuccess?: () => void;
+  onStudentSuccess?: () => void;
   onOpenOnboarding?: () => void;
   theme: 'dark' | 'light';
   initialState?: {
@@ -42,6 +43,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   isOpen,
   onClose,
   onMentorSuccess,
+  onStudentSuccess,
   onOpenOnboarding,
   theme,
   initialState,
@@ -173,6 +175,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         });
         if (role === 'mentor' && onMentorSuccess) {
           onMentorSuccess();
+        } else if (role === 'student_mentee' && onStudentSuccess) {
+          onStudentSuccess();
         }
         window.setTimeout(onClose, 1000);
       } else {
@@ -184,6 +188,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         setAuthMessage({ text: 'Signed in successfully! Welcome back.', type: 'success' });
         if (role === 'mentor' && onMentorSuccess) {
           onMentorSuccess();
+        } else if (role === 'student_mentee' && onStudentSuccess) {
+          onStudentSuccess();
         }
         window.setTimeout(onClose, 800);
       }
@@ -315,7 +321,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border p-3 text-center transition cursor-pointer relative ${
                   isDark
                     ? role === 'mentor'
-                      ? 'border-[#CCFF00] bg-[#CCFF00]/15 text-white shadow-md shadow-[#CCFF00]/15 ring-2 ring-[#CCFF00]/60'
+                      ? 'border-[#3B82F6] bg-[#3B82F6]/15 text-white shadow-md shadow-[#3B82F6]/15 ring-2 ring-[#3B82F6]/60'
                       : 'border-zinc-800 text-zinc-300 hover:border-zinc-700 bg-zinc-900/40'
                     : role === 'mentor'
                     ? 'border-emerald-600 bg-emerald-500/10 text-slate-900 shadow-md shadow-emerald-500/10 ring-2 ring-emerald-600/50'
@@ -326,7 +332,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   className={`p-2 rounded-full ${
                     role === 'mentor'
                       ? isDark
-                        ? 'bg-[#CCFF00]/25 text-[#CCFF00]'
+                        ? 'bg-[#3B82F6]/25 text-[#60A5FA]'
                         : 'bg-emerald-600/20 text-emerald-700'
                       : isDark
                       ? 'bg-zinc-800 text-zinc-400'
@@ -341,7 +347,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 </div>
                 {role === 'mentor' && (
                   <div className="absolute top-2 right-2">
-                    <span className="w-2 h-2 rounded-full bg-[#CCFF00] dark:bg-[#CCFF00] block shadow-sm shadow-[#CCFF00]" />
+                    <span className="w-2 h-2 rounded-full bg-[#3B82F6] dark:bg-[#3B82F6] block shadow-sm shadow-[#3B82F6]" />
                   </div>
                 )}
               </button>
@@ -357,7 +363,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               }}
               className={`w-full rounded-xl py-3 text-sm font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-98 ${
                 isDark
-                  ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                  ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                   : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
               }`}
             >
@@ -382,7 +388,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </button>
               <span
                 className={`text-[10px] px-2 py-0.5 rounded-full font-mono uppercase tracking-wide ${
-                  isDark ? 'bg-zinc-800 text-[#CCFF00]' : 'bg-blue-50 text-[#0066FF]'
+                  isDark ? 'bg-zinc-800 text-[#60A5FA]' : 'bg-blue-50 text-[#0066FF]'
                 }`}
               >
                 {role === 'mentor' ? 'AIR Mentor' : 'NEET Aspirant'}
@@ -440,7 +446,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             >
               {isGoogleSubmitting ? (
                 <>
-                  <LoaderCircle className="h-4 w-4 animate-spin text-[#CCFF00]" />
+                  <LoaderCircle className="h-4 w-4 animate-spin text-[#60A5FA]" />
                   <span>Connecting to Google...</span>
                 </>
               ) : (
@@ -498,7 +504,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     required
                     className={`w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:outline-none ${
                       isDark
-                        ? 'bg-zinc-900/90 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                        ? 'bg-zinc-900/90 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#3B82F6]'
                         : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                     }`}
                   />
@@ -521,7 +527,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   required
                   className={`w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:outline-none ${
                     isDark
-                      ? 'bg-zinc-900/90 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                      ? 'bg-zinc-900/90 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#3B82F6]'
                       : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                   }`}
                 />
@@ -544,7 +550,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   required
                   className={`w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:outline-none ${
                     isDark
-                      ? 'bg-zinc-900/90 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                      ? 'bg-zinc-900/90 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#3B82F6]'
                       : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                   }`}
                 />
@@ -568,7 +574,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     onChange={(e) => setPhone(e.target.value)}
                     className={`w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:outline-none ${
                       isDark
-                        ? 'bg-zinc-900/90 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                        ? 'bg-zinc-900/90 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#3B82F6]'
                         : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                     }`}
                   />
@@ -578,7 +584,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       ? 'bg-zinc-900/80 border-zinc-800 text-zinc-300'
                       : 'bg-slate-100 border-slate-200 text-slate-700'
                   }`}>
-                    <ShieldCheck className="w-4 h-4 text-[#CCFF00] shrink-0 mt-0.5" />
+                    <ShieldCheck className="w-4 h-4 text-[#60A5FA] shrink-0 mt-0.5" />
                     <span>
                       <strong>No OTP required:</strong> Mobile number is collected for mentor coordination only. OTP verification is bypassed.
                     </span>
@@ -592,7 +598,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 disabled={isAnySubmitting}
                 className={`mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition disabled:opacity-60 cursor-pointer shadow-sm ${
                   isDark
-                    ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                    ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                     : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
                 }`}
               >
@@ -620,11 +626,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               >
                 {authMode === 'login' ? (
                   <span>
-                    New here? <span className={`font-semibold ${isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}`}>Register an account</span>
+                    New here? <span className={`font-semibold ${isDark ? 'text-[#60A5FA]' : 'text-[#0066FF]'}`}>Register an account</span>
                   </span>
                 ) : (
                   <span>
-                    Already registered? <span className={`font-semibold ${isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}`}>Log in</span>
+                    Already registered? <span className={`font-semibold ${isDark ? 'text-[#60A5FA]' : 'text-[#0066FF]'}`}>Log in</span>
                   </span>
                 )}
               </button>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Trophy, Target, Globe, Info, LayoutDashboard } from 'lucide-react';
+import { Home, Trophy, Target, Globe, Info, LayoutDashboard, GraduationCap } from 'lucide-react';
 
 export interface NavItem {
   id: string;
@@ -10,14 +10,18 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'toppers', label: 'Toppers', icon: Trophy },
+  { id: 'aspirant_dashboard', label: 'Aspirant Portal', icon: GraduationCap },
   { id: 'oqad', label: 'Daily Question', icon: Target },
-  { id: 'abroad', label: 'Study Abroad', icon: Globe },
   { id: 'about', label: 'About Us', icon: Info },
 ];
 
 export const MENTOR_NAV_ITEMS: NavItem[] = [
   { id: 'dashboard', label: 'Topper Portal', icon: LayoutDashboard },
-  ...NAV_ITEMS,
+  { id: 'home', label: 'Home', icon: Home },
+  { id: 'toppers', label: 'Toppers', icon: Trophy },
+  { id: 'aspirant_dashboard', label: 'Aspirant Portal', icon: GraduationCap },
+  { id: 'oqad', label: 'Daily Question', icon: Target },
+  { id: 'about', label: 'About Us', icon: Info },
 ];
 
 interface DesktopNavProps {
@@ -54,7 +58,7 @@ export const DesktopNav: React.FC<DesktopNavProps> = ({
             className={`desktop-nav-button group relative flex h-11 min-w-[58px] shrink-0 cursor-pointer select-none flex-col items-center justify-center gap-0.5 whitespace-nowrap px-2 rounded-xl text-[10px] font-medium transition-all duration-300 ${
               isActive
                 ? isDark
-                  ? 'desktop-nav-button--active-dark text-[#CCFF00] bg-white/5'
+                  ? 'desktop-nav-button--active-dark text-[#3B82F6] bg-blue-500/10'
                   : 'desktop-nav-button--active-light text-[#0066FF] bg-black/5'
                 : isDark
                 ? 'text-zinc-400 hover:text-white hover:bg-zinc-800/40'
@@ -65,7 +69,7 @@ export const DesktopNav: React.FC<DesktopNavProps> = ({
               className={`desktop-nav-icon h-[16px] w-[16px] shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 ${
                 isActive
                   ? isDark
-                    ? 'text-[#CCFF00]'
+                    ? 'text-[#3B82F6]'
                     : 'text-[#0066FF]'
                   : ''
               }`}
@@ -116,7 +120,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all cursor-pointer min-w-[56px] ${
                 isActive
                   ? isDark
-                    ? 'text-[#CCFF00]'
+                    ? 'text-[#3B82F6]'
                     : 'text-[#0066FF]'
                   : isDark
                   ? 'text-zinc-300 hover:text-white'
@@ -127,7 +131,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                 className={`p-1 rounded-lg transition-all ${
                   isActive
                     ? isDark
-                      ? 'bg-[#CCFF00]/15'
+                      ? 'bg-[#3B82F6]/15'
                       : 'bg-[#0066FF]/10'
                     : ''
                 }`}

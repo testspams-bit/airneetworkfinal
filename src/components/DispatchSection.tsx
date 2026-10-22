@@ -31,7 +31,7 @@ export const DispatchSection: React.FC<DispatchSectionProps> = ({ theme, onOpenB
               }`}
             >
               KEEP THE <br />
-              <span className={isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}>
+              <span className={isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'}>
                 RANK.
               </span>
             </h2>
@@ -66,7 +66,7 @@ export const DispatchSection: React.FC<DispatchSectionProps> = ({ theme, onOpenB
                   type="submit"
                   className={`text-xs font-mono font-bold uppercase tracking-widest whitespace-nowrap transition-transform active:scale-95 ${
                     isDark
-                      ? 'text-[#CCFF00] hover:text-[#b8e600]'
+                      ? 'text-[#3B82F6] hover:text-[#2563EB]'
                       : 'text-[#0066FF] hover:text-[#0052cc]'
                   }`}
                 >

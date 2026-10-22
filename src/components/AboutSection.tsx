@@ -92,7 +92,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ theme }) => {
               <div
                 className={`grid h-9 w-9 place-items-center rounded-xl transition-all duration-200 ${
                   isDark
-                    ? 'bg-[#CCFF00]/15 text-[#CCFF00] group-hover:bg-[#CCFF00] group-hover:text-black'
+                    ? 'bg-[#3B82F6]/15 text-[#60A5FA] group-hover:bg-[#3B82F6] group-hover:text-white'
                     : 'bg-[#0066FF]/10 text-[#0066FF] group-hover:bg-[#0066FF] group-hover:text-white'
                 }`}
               >
@@ -114,7 +114,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ theme }) => {
               <div
                 className={`grid h-9 w-9 place-items-center rounded-xl transition-all duration-200 ${
                   isDark
-                    ? 'bg-[#CCFF00]/15 text-[#CCFF00] group-hover:bg-[#CCFF00] group-hover:text-black'
+                    ? 'bg-[#3B82F6]/15 text-[#60A5FA] group-hover:bg-[#3B82F6] group-hover:text-white'
                     : 'bg-[#0066FF]/10 text-[#0066FF] group-hover:bg-[#0066FF] group-hover:text-white'
                 }`}
               >
@@ -142,7 +142,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ theme }) => {
           <div className="flex items-center justify-center">
             <span
               className={`grid h-14 w-14 place-items-center rounded-full ${
-                isDark ? 'bg-[#CCFF00] text-black' : 'bg-[#0066FF] text-white'
+                isDark ? 'bg-[#3B82F6] text-white' : 'bg-[#0066FF] text-white'
               }`}
             >
               <Play className="ml-0.5 h-6 w-6 fill-current" />

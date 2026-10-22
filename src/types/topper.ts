@@ -10,6 +10,8 @@ export interface SubjectWiseMarks {
 
 export interface TopperProfile {
   id: string;
+  claimedByUserId?: string;
+  isClaimed?: boolean;
   name: string;
   avatarUrl?: string;
   gender: Gender;

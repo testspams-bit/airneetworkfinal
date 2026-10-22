@@ -73,7 +73,7 @@ export const AIChatModal = ({ isOpen, onClose, theme }: AIChatModalProps) => {
       >
         <header className={`flex items-center justify-between border-b px-4 py-3 ${isDark ? 'border-zinc-800' : 'border-slate-200'}`}>
           <div className="flex items-center gap-2 text-sm font-semibold">
-            <Bot className={`h-4 w-4 ${isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}`} />
+            <Bot className={`h-4 w-4 ${isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'}`} />
             AIR NEETwork AI
           </div>
           <button type="button" onClick={onClose} aria-label="Close chat" className={`rounded-lg p-1.5 ${isDark ? 'text-zinc-400 hover:bg-zinc-800' : 'text-slate-500 hover:bg-slate-100'}`}>
@@ -84,7 +84,7 @@ export const AIChatModal = ({ isOpen, onClose, theme }: AIChatModalProps) => {
         <div className="flex-1 space-y-3 overflow-y-auto p-4" aria-live="polite">
           {messages.map((message, index) => (
             <div key={`${message.role}-${index}`} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <p className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm ${message.role === 'user' ? isDark ? 'bg-[#CCFF00] text-black' : 'bg-[#0066FF] text-white' : isDark ? 'bg-zinc-900 text-zinc-100' : 'bg-slate-100 text-slate-800'}`}>
+              <p className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm ${message.role === 'user' ? isDark ? 'bg-[#3B82F6] text-white' : 'bg-[#0066FF] text-white' : isDark ? 'bg-zinc-900 text-zinc-100' : 'bg-slate-100 text-slate-800'}`}>
                 {message.text}
               </p>
             </div>
@@ -100,9 +100,9 @@ export const AIChatModal = ({ isOpen, onClose, theme }: AIChatModalProps) => {
             onChange={(event) => setDraft(event.target.value)}
             placeholder="Ask a question…"
             aria-label="Message the AI assistant"
-            className={`min-w-0 flex-1 rounded-xl border px-3 py-2 text-sm outline-none ${isDark ? 'border-zinc-800 bg-zinc-900 text-white focus:border-[#CCFF00]' : 'border-slate-200 bg-slate-50 text-slate-900 focus:border-[#0066FF]'}`}
+            className={`min-w-0 flex-1 rounded-xl border px-3 py-2 text-sm outline-none ${isDark ? 'border-zinc-800 bg-zinc-900 text-white focus:border-[#3B82F6]' : 'border-slate-200 bg-slate-50 text-slate-900 focus:border-[#0066FF]'}`}
           />
-          <button type="submit" disabled={isSending || !draft.trim()} aria-label="Send message" className={`rounded-xl p-2.5 disabled:opacity-40 ${isDark ? 'bg-[#CCFF00] text-black' : 'bg-[#0066FF] text-white'}`}>
+          <button type="submit" disabled={isSending || !draft.trim()} aria-label="Send message" className={`rounded-xl p-2.5 disabled:opacity-40 ${isDark ? 'bg-[#3B82F6] text-white' : 'bg-[#0066FF] text-white'}`}>
             <Send className="h-4 w-4" />
           </button>
         </form>

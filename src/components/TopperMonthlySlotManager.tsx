@@ -142,8 +142,8 @@ export const TopperMonthlySlotManager: React.FC<TopperMonthlySlotManagerProps> =
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Calendar className="w-4 h-4 text-[#CCFF00]" />
-              <span className="text-[11px] font-mono uppercase tracking-wider font-bold text-[#CCFF00]">
+              <Calendar className="w-4 h-4 text-[#60A5FA]" />
+              <span className="text-[11px] font-mono uppercase tracking-wider font-bold text-[#60A5FA]">
                 30-Day Monthly Availability Matrix
               </span>
             </div>
@@ -161,7 +161,7 @@ export const TopperMonthlySlotManager: React.FC<TopperMonthlySlotManagerProps> =
                 isDark ? 'bg-zinc-900/80 border-zinc-700' : 'bg-slate-100 border-slate-300'
               }`}
             >
-              <div className="text-lg font-black text-[#CCFF00] leading-none">
+              <div className="text-lg font-black text-[#60A5FA] leading-none">
                 {totalSlotsCount}
               </div>
               <div className="text-[9px] uppercase tracking-wider text-zinc-400 mt-0.5">
@@ -176,7 +176,7 @@ export const TopperMonthlySlotManager: React.FC<TopperMonthlySlotManagerProps> =
                 savedSuccess
                   ? 'bg-emerald-500 text-black'
                   : isDark
-                  ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                  ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                   : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
               }`}
             >
@@ -231,7 +231,7 @@ export const TopperMonthlySlotManager: React.FC<TopperMonthlySlotManagerProps> =
             onClick={() => applyPreset('all_nights')}
             className={`px-3 py-1.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
               isDark
-                ? 'bg-zinc-900/90 border-zinc-700 text-zinc-300 hover:border-[#CCFF00] hover:text-white'
+                ? 'bg-zinc-900/90 border-zinc-700 text-zinc-300 hover:border-[#3B82F6] hover:text-white'
                 : 'bg-slate-100 border-slate-300 text-slate-700 hover:border-blue-500'
             }`}
           >
@@ -262,7 +262,7 @@ export const TopperMonthlySlotManager: React.FC<TopperMonthlySlotManagerProps> =
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold font-mono uppercase tracking-wider flex items-center gap-2">
-              <CalendarCheck className="w-4 h-4 text-[#CCFF00]" />
+              <CalendarCheck className="w-4 h-4 text-[#60A5FA]" />
               <span>Next 30 Days (Click Day to Customize)</span>
             </h3>
             <span className="text-[10px] font-mono text-zinc-400">
@@ -356,7 +356,7 @@ export const TopperMonthlySlotManager: React.FC<TopperMonthlySlotManagerProps> =
                   className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
                     selectedDay.enabledSlots.length > 0
                       ? 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:text-white'
-                      : 'bg-[#CCFF00]/20 text-[#CCFF00] border-[#CCFF00]/40 hover:bg-[#CCFF00]/30'
+                      : 'bg-[#3B82F6]/20 text-[#60A5FA] border-[#3B82F6]/40 hover:bg-[#3B82F6]/30'
                   }`}
                 >
                   {selectedDay.enabledSlots.length > 0 ? 'Clear Day' : 'Select All'}

@@ -26,7 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Zone 1: Brand Logo linking to homepage */}
         <a
           href="/"
-          className="flex items-center shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CCFF00] rounded-xl"
+          className="flex items-center shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] rounded-xl"
           aria-label="Air NEETwork"
         >
           <Logo theme={theme} size="sm" />
@@ -61,7 +61,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <a
             href="#dispatch"
             className={`whitespace-nowrap transition-colors ${
-              isDark ? 'text-zinc-400 hover:text-[#CCFF00]' : 'text-slate-600 hover:text-[#0066FF]'
+              isDark ? 'text-zinc-400 hover:text-[#3B82F6]' : 'text-slate-600 hover:text-[#0066FF]'
             }`}
           >
             AIR Dispatch
@@ -82,12 +82,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onToggleTheme('dark')}
               className={`px-3 py-1.5 rounded-md transition-all whitespace-nowrap font-mono ${
                 isDark
-                  ? 'bg-black text-[#CCFF00] border border-[#CCFF00]/40 shadow-sm font-bold'
+                  ? 'bg-black text-[#60A5FA] border border-[#3B82F6]/40 shadow-sm font-bold'
                   : 'text-slate-500 hover:text-slate-900'
               }`}
-              title="Brutalist Dark theme (from your uploaded reference)"
+              title="Brutalist Dark theme"
             >
-              Dark / Volt
+              Dark Mode
             </button>
             <button
               onClick={() => onToggleTheme('light')}
@@ -107,7 +107,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={onOpenBooking}
             className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all whitespace-nowrap shrink-0 shadow-sm font-mono ${
               isDark
-                ? 'bg-[#CCFF00] text-black hover:bg-[#b8e600] active:scale-95'
+                ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB] active:scale-95'
                 : 'bg-[#0066FF] text-white hover:bg-[#0052cc] active:scale-95 shadow-[#0066FF]/20 shadow-md'
             }`}
           >

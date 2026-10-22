@@ -36,7 +36,7 @@ export const MentorSpotlight: React.FC<MentorSpotlightProps> = ({
           <div>
             <div
               className={`text-xs font-mono font-bold tracking-widest uppercase mb-3 ${
-                isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'
+                isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'
               }`}
             >
               [ VERIFIED AIR MENTORS · TOP RANKERS ]
@@ -119,7 +119,7 @@ export const MentorSpotlight: React.FC<MentorSpotlightProps> = ({
                       AIR {mentor.airRank}
                     </span>
 
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[#CCFF00] font-mono text-xs font-black shadow-md">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-white font-mono text-xs font-black shadow-md">
                       {rateInfo.display}
                     </span>
                   </div>
@@ -179,7 +179,7 @@ export const MentorSpotlight: React.FC<MentorSpotlightProps> = ({
                       onClick={() => onSelectMentor(mentor.name)}
                       className={`w-full py-2.5 px-4 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-95 ${
                         isDark
-                          ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33] shadow-[#CCFF00]/10'
+                          ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB] shadow-[#3B82F6]/20'
                           : 'bg-[#0066FF] text-white hover:bg-[#0052cc] shadow-[#0066FF]/20'
                       }`}
                     >

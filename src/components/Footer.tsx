@@ -36,7 +36,7 @@ export const Footer: React.FC<FooterProps> = ({ theme }) => {
                 Address
               </div>
               <div className="flex items-center gap-2">
-                <MapPin className={`w-3.5 h-3.5 shrink-0 ${isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}`} />
+                <MapPin className={`w-3.5 h-3.5 shrink-0 ${isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'}`} />
                 <span>Jaipur 302018, India</span>
               </div>
             </div>

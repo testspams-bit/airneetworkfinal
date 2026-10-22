@@ -488,14 +488,14 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
               onClick={handleRegisterLaterPayFirst}
               className={`p-6 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between hover:scale-[1.01] ${
                 isDark
-                  ? 'bg-zinc-900 border-[#CCFF00]/40 hover:border-[#CCFF00] hover:shadow-[0_0_20px_rgba(204,255,0,0.1)]'
+                  ? 'bg-zinc-900 border-[#3B82F6]/40 hover:border-[#3B82F6] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]'
                   : 'bg-white border-[#0066FF]/40 hover:border-[#0066FF] hover:shadow-md'
               }`}
             >
               <div>
                 <div
                   className={`w-10 h-10 rounded-xl mb-4 flex items-center justify-center ${
-                    isDark ? 'bg-[#CCFF00]/15 text-[#CCFF00]' : 'bg-[#0066FF]/15 text-[#0066FF]'
+                    isDark ? 'bg-[#3B82F6]/15 text-[#60A5FA]' : 'bg-[#0066FF]/15 text-[#0066FF]'
                   }`}
                 >
                   <CreditCard className="w-5 h-5" />
@@ -508,7 +508,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
 
               <div
                 className={`flex items-center gap-1.5 text-xs font-mono font-bold uppercase mt-6 ${
-                  isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'
+                  isDark ? 'text-[#60A5FA]' : 'text-[#0066FF]'
                 }`}
               >
                 <span>Continue & pay ₹1 first</span>
@@ -544,7 +544,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
               onClick={() => setStep('advisory_decision')}
               className={`w-full sm:w-auto px-8 py-3.5 rounded-xl font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg active:scale-95 ${
                 isDark
-                  ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                  ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                   : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
               }`}
             >
@@ -614,14 +614,14 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
               onClick={handleLetUsSelect}
               className={`p-6 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between hover:scale-[1.01] ${
                 isDark
-                  ? 'bg-zinc-900 border-[#CCFF00]/40 hover:border-[#CCFF00] hover:shadow-[0_0_20px_rgba(204,255,0,0.1)]'
+                  ? 'bg-zinc-900 border-[#3B82F6]/40 hover:border-[#3B82F6] hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]'
                   : 'bg-white border-[#0066FF]/40 hover:border-[#0066FF] hover:shadow-md'
               }`}
             >
               <div>
                 <div
                   className={`w-10 h-10 rounded-xl mb-4 flex items-center justify-center ${
-                    isDark ? 'bg-[#CCFF00]/15 text-[#CCFF00]' : 'bg-[#0066FF]/15 text-[#0066FF]'
+                    isDark ? 'bg-[#3B82F6]/15 text-[#60A5FA]' : 'bg-[#0066FF]/15 text-[#0066FF]'
                   }`}
                 >
                   <ClipboardCheck className="w-5 h-5" />
@@ -634,7 +634,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
 
               <div
                 className={`flex items-center gap-1.5 text-xs font-mono font-bold uppercase mt-6 ${
-                  isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'
+                  isDark ? 'text-[#60A5FA]' : 'text-[#0066FF]'
                 }`}
               >
                 <span>Take assessment</span>
@@ -679,7 +679,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
               }}
               className={`w-full sm:w-auto px-6 py-3 rounded-xl font-mono font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm ${
                 isDark
-                  ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                  ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                   : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
               }`}
             >
@@ -715,7 +715,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
             <div className="flex items-center gap-2">
               <span
                 className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded ${
-                  isDark ? 'bg-zinc-800 text-[#CCFF00]' : 'bg-slate-100 text-[#0066FF]'
+                  isDark ? 'bg-zinc-800 text-[#60A5FA]' : 'bg-slate-100 text-[#0066FF]'
                 }`}
               >
                 Question {qIndex + 1} of {DIAGNOSTIC_QUESTIONS.length}
@@ -730,7 +730,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
           {/* Progress bar */}
           <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
             <div
-              className={`h-full transition-all duration-300 ${isDark ? 'bg-[#CCFF00]' : 'bg-[#0066FF]'}`}
+              className={`h-full transition-all duration-300 ${isDark ? 'bg-[#3B82F6]' : 'bg-[#0066FF]'}`}
               style={{ width: `${((qIndex + 1) / DIAGNOSTIC_QUESTIONS.length) * 100}%` }}
             />
           </div>
@@ -800,7 +800,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
                 key={mentor.id}
                 className={`p-5 rounded-2xl border border-dashed transition-all flex flex-col justify-between ${
                   isDark
-                    ? 'bg-zinc-950/90 border-zinc-700 hover:border-[#CCFF00] hover:bg-zinc-900'
+                    ? 'bg-zinc-950/90 border-zinc-700 hover:border-[#3B82F6] hover:bg-zinc-900'
                     : 'bg-slate-50 border-slate-300 hover:border-[#0066FF] hover:bg-white'
                 }`}
               >
@@ -838,7 +838,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
                     onClick={() => handleSelectWireframeMentor(mentor)}
                     className={`w-full py-2.5 px-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-95 border ${
                       isDark
-                        ? 'bg-zinc-800 text-white border-zinc-600 hover:bg-[#CCFF00] hover:text-black hover:border-[#CCFF00]'
+                        ? 'bg-zinc-800 text-white border-zinc-600 hover:bg-[#3B82F6] hover:text-white hover:border-[#3B82F6]'
                         : 'bg-slate-800 text-white border-slate-700 hover:bg-[#0066FF] hover:border-[#0066FF]'
                     }`}
                   >
@@ -865,7 +865,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
               <span className="text-[10px] font-mono uppercase text-zinc-400">Assigned / Selected Mentor:</span>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="font-bold text-sm">{selectedMentor.name}</span>
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-zinc-800 text-[#CCFF00]">
+                <span className="text-xs font-mono px-2 py-0.5 rounded bg-zinc-800 text-[#60A5FA]">
                   {selectedMentor.rank}
                 </span>
                 <span className="text-xs text-zinc-400">({selectedMentor.college})</span>
@@ -891,7 +891,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
           >
             <div className="border-b border-zinc-800/60 pb-2">
               <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-2">
-                <User className="w-4 h-4 text-[#CCFF00]" />
+                <User className="w-4 h-4 text-[#60A5FA]" />
                 <span>Basic Details (To Locate Your Payment)</span>
               </h4>
               <p className="text-[11px] text-zinc-400 mt-0.5">
@@ -919,7 +919,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
                   onChange={(e) => setUserName(e.target.value)}
                   className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono focus:outline-none transition-all ${
                     isDark
-                      ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-600 focus:border-[#CCFF00]'
+                      ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-600 focus:border-[#3B82F6]'
                       : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                   }`}
                 />
@@ -937,7 +937,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
                   onChange={(e) => setUserPhone(e.target.value)}
                   className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono focus:outline-none transition-all ${
                     isDark
-                      ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-600 focus:border-[#CCFF00]'
+                      ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-600 focus:border-[#3B82F6]'
                       : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                   }`}
                 />
@@ -953,7 +953,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
                 onChange={(e) => setTargetYear(e.target.value)}
                 className={`w-full px-3 py-2.5 rounded-xl border text-xs font-mono focus:outline-none ${
                   isDark
-                    ? 'bg-zinc-900 border-zinc-700 text-white focus:border-[#CCFF00]'
+                    ? 'bg-zinc-900 border-zinc-700 text-white focus:border-[#3B82F6]'
                     : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-[#0066FF]'
                 }`}
               >
@@ -972,7 +972,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
           >
             <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
               <div className="flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-[#CCFF00]" />
+                <CreditCard className="w-4 h-4 text-[#60A5FA]" />
                 <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-300">
                   Pay Rupee One to Request Slot
                 </h4>
@@ -1064,7 +1064,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
                     onChange={(e) => setUtrNumber(e.target.value)}
                     className={`w-full px-3 py-2 rounded-xl border text-xs font-mono focus:outline-none ${
                       isDark
-                        ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-600 focus:border-[#CCFF00]'
+                        ? 'bg-zinc-900 border-zinc-700 text-white placeholder-zinc-600 focus:border-[#3B82F6]'
                         : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                     }`}
                   />
@@ -1080,7 +1080,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
                 isProcessing
                   ? 'opacity-70 cursor-wait'
                   : isDark
-                  ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                  ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                   : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
               }`}
             >
@@ -1122,7 +1122,7 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
           >
             <div className="flex justify-between items-center pb-2 border-b border-zinc-800">
               <span className="text-zinc-400">Booking Ref ID:</span>
-              <span className="font-bold text-[#CCFF00] text-sm">{bookingRef}</span>
+              <span className="font-bold text-[#60A5FA] text-sm">{bookingRef}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-zinc-400">Mentor:</span>

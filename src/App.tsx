@@ -21,6 +21,7 @@ import { MentorSpotlight } from './components/MentorSpotlight.tsx';
 import { BookingModal } from './components/BookingModal.tsx';
 import { BookingPaymentFlow } from './components/BookingPaymentFlow.tsx';
 import { TopperDashboard } from './components/TopperDashboard.tsx';
+import { AspirantDashboard } from './components/AspirantDashboard.tsx';
 import { TopperProfileOnboardingModal } from './components/TopperProfileOnboardingModal.tsx';
 import { StudentSessionsModal } from './components/StudentSessionsModal.tsx';
 import { loadTopperProfile } from './utils/topperStorage.ts';
@@ -121,11 +122,33 @@ export default function App() {
     );
   }
 
+  // If activeNav is 'aspirant_dashboard' or 'oqad', render the dedicated Aspirant Dashboard
+  if (activeNav === 'aspirant_dashboard' || activeNav === 'oqad') {
+    return (
+      <AspirantDashboard
+        theme={theme}
+        userId={currentUser?.id || 'student_active'}
+        userEmail={currentUser?.email}
+        userName={currentUser?.fullName}
+        initialTab={activeNav === 'oqad' ? 'daily_question' : 'assessment'}
+        onSignOut={async () => {
+          await authSignOut();
+          setActiveNav('home');
+        }}
+        onSwitchToHome={() => setActiveNav('home')}
+        onBookMoreSessions={() => {
+          setActiveNav('home');
+          setIsBookingOpen(true);
+        }}
+      />
+    );
+  }
+
   return (
     <div
       className={`min-h-screen transition-colors duration-200 flex flex-col justify-between pb-16 md:pb-0 ${
         isDark
-          ? 'bg-[#080808] text-white selection:bg-[#CCFF00] selection:text-black'
+          ? 'bg-[#080808] text-white selection:bg-[#3B82F6] selection:text-white'
           : 'bg-white text-slate-900 selection:bg-[#0066FF] selection:text-white'
       }`}
     >
@@ -142,7 +165,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => setIsSocialOpen(true)}
-            className="flex items-center shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#CCFF00] rounded-xl transition-transform active:scale-98 cursor-pointer text-left"
+            className="flex items-center shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] rounded-xl transition-transform active:scale-98 cursor-pointer text-left"
             title="Click to visit Instagram & YouTube channels"
             aria-label="Air NEETwork — Open Instagram and YouTube channels"
           >
@@ -183,7 +206,7 @@ export default function App() {
               />
               <Moon
                 className={`w-3.5 h-3.5 mr-1 transition-opacity duration-200 ${
-                  isDark ? 'text-[#CCFF00] opacity-90' : 'text-slate-400 opacity-60'
+                  isDark ? 'text-blue-400 opacity-90' : 'text-slate-400 opacity-60'
                 }`}
               />
 
@@ -191,7 +214,7 @@ export default function App() {
               <div
                 className={`absolute top-1 left-1 w-6 h-6 rounded-full shadow-md transition-transform duration-300 ease-out flex items-center justify-center ${
                   isDark
-                    ? 'translate-x-7 sm:translate-x-8 bg-black text-[#CCFF00] border border-zinc-700'
+                    ? 'translate-x-7 sm:translate-x-8 bg-black text-blue-400 border border-zinc-700'
                     : 'translate-x-0 bg-white text-[#0066FF]'
                 }`}
               >
@@ -233,7 +256,7 @@ export default function App() {
                 >
                   <span
                     className={`w-2 h-2 rounded-full ${
-                      currentUser.role === 'mentor' ? 'bg-[#CCFF00]' : 'bg-[#0066FF]'
+                      currentUser.role === 'mentor' ? 'bg-purple-400' : 'bg-[#3B82F6]'
                     }`}
                   />
                   <span className="max-w-[110px] truncate">{currentUser.fullName || currentUser.email.split('@')[0]}</span>
@@ -247,19 +270,34 @@ export default function App() {
                 </div>
 
                 {currentUser.role === 'student_mentee' && (
-                  <button
-                    type="button"
-                    onClick={() => setIsStudentSessionsOpen(true)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer active:scale-95 shadow-sm ${
-                      isDark
-                        ? 'border-emerald-500/50 bg-emerald-950/40 text-emerald-200 hover:bg-emerald-900/50 hover:border-emerald-400'
-                        : 'border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100'
-                    }`}
-                    title="View My Mentoring Sessions & Confirmed Slots"
-                  >
-                    <Calendar className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>My Sessions</span>
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setActiveNav('aspirant_dashboard')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer active:scale-95 shadow-sm ${
+                        isDark
+                          ? 'border-emerald-500/50 bg-emerald-950/40 text-emerald-200 hover:bg-emerald-900/50 hover:border-emerald-400'
+                          : 'border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100'
+                      }`}
+                      title="Open Aspirant Dashboard (Assessments, Profile, Payments, Recordings, Plan, Daily Question)"
+                    >
+                      <LayoutDashboard className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Aspirant Dashboard</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsStudentSessionsOpen(true)}
+                      className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-mono font-medium transition-all cursor-pointer active:scale-95 ${
+                        isDark
+                          ? 'border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:text-white'
+                          : 'border-slate-200 bg-white text-slate-700 hover:text-slate-900'
+                      }`}
+                      title="View My Mentoring Sessions & Confirmed Slots"
+                    >
+                      <Calendar className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>Slots</span>
+                    </button>
+                  </div>
                 )}
 
                 <button
@@ -305,7 +343,7 @@ export default function App() {
                   }}
                   className={`h-8 px-3 sm:px-3.5 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 active:scale-95 shadow-sm border select-none ${
                     isDark
-                      ? 'bg-[#CCFF00] hover:bg-[#d8ff33] text-black border-[#CCFF00]/50 shadow-[#CCFF00]/10'
+                      ? 'bg-[#3B82F6] hover:bg-[#2563EB] text-white border-[#3B82F6]/50 shadow-[#3B82F6]/20'
                       : 'bg-[#0066FF] hover:bg-[#0052cc] text-white border-[#0066FF]/50 shadow-[#0066FF]/15'
                   }`}
                   title="Create a new account as Student or AIR Mentor"
@@ -403,7 +441,7 @@ export default function App() {
             onClick={() => setIsGetInTouchOpen(true)}
             className={`inline-flex items-center gap-2.5 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider font-mono transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shadow-lg ${
               isDark
-                ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                 : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
             }`}
             title="Open contact & callback options"
@@ -466,6 +504,10 @@ export default function App() {
           setIsLoginOpen(false);
           setIsOnboardingOpen(true);
         }}
+        onStudentSuccess={() => {
+          setIsLoginOpen(false);
+          setActiveNav('aspirant_dashboard');
+        }}
         onOpenOnboarding={() => {
           setIsLoginOpen(false);
           setIsOnboardingOpen(true);
@@ -527,7 +569,7 @@ export default function App() {
           }}
           className={`px-2.5 py-1.5 rounded-xl border font-bold transition cursor-pointer select-none shrink-0 ${
             isLoginOpen && authModalState?.role === 'mentor' && authModalState?.mode === 'signup'
-              ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-sm'
+              ? 'bg-[#3B82F6] text-white border-[#3B82F6] shadow-sm'
               : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500'
           }`}
           title="Preview Step 1: Mentor Sign-up & Credentials"

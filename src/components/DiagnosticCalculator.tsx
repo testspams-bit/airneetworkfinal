@@ -32,7 +32,7 @@ export const DiagnosticCalculator: React.FC<DiagnosticCalculatorProps> = ({
         <div className="max-w-3xl mb-16">
           <div
             className={`text-xs font-mono font-bold tracking-widest uppercase mb-3 ${
-              isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'
+              isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'
             }`}
           >
             [ AIR SCORE GAP DIAGNOSTIC ]
@@ -71,7 +71,7 @@ export const DiagnosticCalculator: React.FC<DiagnosticCalculatorProps> = ({
                   </label>
                   <span
                     className={`text-2xl font-extrabold font-mono ${
-                      isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'
+                      isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'
                     }`}
                   >
                     {currentScore}{' '}
@@ -85,7 +85,7 @@ export const DiagnosticCalculator: React.FC<DiagnosticCalculatorProps> = ({
                   step="5"
                   value={currentScore}
                   onChange={(e) => setCurrentScore(Number(e.target.value))}
-                  className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#CCFF00]"
+                  className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#3B82F6]"
                 />
                 <div className="flex justify-between text-[11px] text-zinc-500 mt-2 font-mono">
                   <span>350</span>
@@ -115,7 +115,7 @@ export const DiagnosticCalculator: React.FC<DiagnosticCalculatorProps> = ({
                         className={`w-full p-3.5 rounded-xl text-left text-xs font-mono flex items-center justify-between transition-all border ${
                           isSelected
                             ? isDark
-                              ? 'bg-[#CCFF00]/10 border-[#CCFF00] text-[#CCFF00] font-bold'
+                              ? 'bg-[#3B82F6]/10 border-[#3B82F6] text-[#3B82F6] font-bold'
                               : 'bg-[#0066FF]/10 border-[#0066FF] text-[#0066FF] font-bold'
                             : isDark
                             ? 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700'
@@ -142,7 +142,7 @@ export const DiagnosticCalculator: React.FC<DiagnosticCalculatorProps> = ({
               <div>
                 <div
                   className={`flex items-center gap-2 text-xs font-mono font-semibold mb-4 ${
-                    isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'
+                    isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'
                   }`}
                 >
                   <TrendingUp className="w-4 h-4" />
@@ -183,7 +183,7 @@ export const DiagnosticCalculator: React.FC<DiagnosticCalculatorProps> = ({
                     <span className={isDark ? 'text-zinc-300' : 'text-slate-700'}>
                       Physics & Chem Numericals Mastery
                     </span>
-                    <span className={`font-bold ${isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}`}>
+                    <span className={`font-bold ${isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'}`}>
                       +{conceptualBoost} Marks
                     </span>
                   </div>
@@ -207,7 +207,7 @@ export const DiagnosticCalculator: React.FC<DiagnosticCalculatorProps> = ({
                 onClick={onOpenBooking}
                 className={`w-full py-3.5 rounded-xl font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all active:scale-95 ${
                   isDark
-                    ? 'bg-[#CCFF00] text-black hover:bg-[#b8e600]'
+                    ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                     : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
                 }`}
               >

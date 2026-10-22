@@ -226,7 +226,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
               className="w-8 h-8 rounded-full object-cover border border-amber-400"
             />
             <div>
-              <div className="text-[10px] font-mono uppercase tracking-widest text-[#CCFF00] font-bold">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-[#60A5FA] font-bold">
                 AIR Mentor Portal
               </div>
               <div className="text-sm font-black truncate max-w-[150px]">
@@ -325,7 +325,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
               isDark ? 'border-zinc-800/80 text-zinc-300' : 'border-slate-200 text-slate-700'
             }`}>
               <span className="text-zinc-400">Fixed Rate:</span>
-              <span className="font-bold text-[#CCFF00] bg-black/40 px-2 py-0.5 rounded-md border border-zinc-800">
+              <span className="font-bold text-[#60A5FA] bg-black/40 px-2 py-0.5 rounded-md border border-zinc-800">
                 {calculatedRate.display} / call
               </span>
             </div>
@@ -348,7 +348,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
                   className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                     isActive
                       ? isDark
-                        ? 'bg-[#CCFF00] text-black shadow-sm font-black'
+                        ? 'bg-[#3B82F6] text-white shadow-sm font-black'
                         : 'bg-[#0066FF] text-white shadow-sm font-black'
                       : isDark
                       ? 'text-zinc-300 hover:text-white hover:bg-zinc-800/60'
@@ -364,7 +364,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded-full font-sans font-bold ${
                         isActive
-                          ? 'bg-black text-[#CCFF00]'
+                          ? 'bg-white/20 text-white'
                           : isDark
                           ? 'bg-zinc-800 text-zinc-300'
                           : 'bg-slate-200 text-slate-800'
@@ -430,7 +430,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
             <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 flex items-center gap-1.5 mb-1">
               <span>Topper Portal</span>
               <span>/</span>
-              <span className={`font-bold ${isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}`}>
+              <span className={`font-bold ${isDark ? 'text-[#3B82F6]' : 'text-[#0066FF]'}`}>
                 {menuItems.find((m) => m.id === activeTab)?.label}
               </span>
             </div>
@@ -467,7 +467,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
               onClick={() => setActiveTab('slots')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm active:scale-95 ${
                 isDark
-                  ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                  ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                   : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
               }`}
             >
@@ -510,7 +510,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveTab('mentees')}
-                  className="text-[10px] font-mono text-[#CCFF00] hover:underline mt-1 block cursor-pointer"
+                  className="text-[10px] font-mono text-[#60A5FA] hover:underline mt-1 block cursor-pointer"
                 >
                   Review & Confirm Slots →
                 </button>
@@ -540,7 +540,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
                   <span className="text-xs font-mono uppercase tracking-wider">Fixed Honorarium</span>
                   <Award className="w-4 h-4 text-amber-400" />
                 </div>
-                <div className="text-2xl font-black text-[#CCFF00]">{calculatedRate.display}</div>
+                <div className="text-2xl font-black text-[#60A5FA]">{calculatedRate.display}</div>
                 <p className={`text-[10px] font-mono mt-1 ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
                   Fixed standard for AIR {profile.airRank}
                 </p>
@@ -576,7 +576,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
                   }}
                   className={`text-xs font-mono px-3 py-1.5 rounded-xl border font-bold cursor-pointer transition-all ${
                     isDark
-                      ? 'bg-zinc-800 border-zinc-700 text-[#CCFF00] hover:bg-zinc-700'
+                      ? 'bg-zinc-800 border-zinc-700 text-[#60A5FA] hover:bg-zinc-700'
                       : 'bg-blue-50 border-blue-200 text-[#0066FF] hover:bg-blue-100'
                   }`}
                 >
@@ -587,7 +587,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
                 <div className={`p-3 rounded-xl border ${isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
                   <span className={`block text-[10px] uppercase ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>AIR Rank</span>
-                  <strong className="text-[#CCFF00] text-sm font-black">AIR {profile.airRank}</strong>
+                  <strong className="text-[#60A5FA] text-sm font-black">AIR {profile.airRank}</strong>
                 </div>
                 <div className={`p-3 rounded-xl border ${isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
                   <span className={`block text-[10px] uppercase ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>NEET Score</span>
@@ -655,7 +655,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
                     onClick={() => setIsEditingProfile(true)}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-mono text-xs font-bold uppercase transition-all cursor-pointer shadow-sm active:scale-95 ${
                       isDark
-                        ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                        ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                         : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
                     }`}
                   >
@@ -727,7 +727,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
 
                     <div className={`p-3.5 rounded-xl border ${isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
                       <span className={`block text-[10px] uppercase ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>6. All India Rank</span>
-                      <strong className="text-sm text-[#CCFF00]">AIR {profile.airRank}</strong>
+                      <strong className="text-sm text-[#60A5FA]">AIR {profile.airRank}</strong>
                     </div>
 
                     <div className={`p-3.5 rounded-xl border sm:col-span-2 ${isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
@@ -756,7 +756,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
                         <span>Physics: <strong>{profile.subjectWiseMarks?.physics ?? 175}/180</strong></span>
                         <span>Chemistry: <strong>{profile.subjectWiseMarks?.chemistry ?? 175}/180</strong></span>
                         <span>Biology: <strong>{profile.subjectWiseMarks?.biology ?? 360}/360</strong></span>
-                        <span className="font-bold text-[#CCFF00]">Total NEET: {profile.totalMarks || 700}/720</span>
+                        <span className="font-bold text-[#60A5FA]">Total NEET: {profile.totalMarks || 700}/720</span>
                       </div>
                     </div>
                   </div>
@@ -808,7 +808,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
                           type="button"
                           onClick={() => setEditAvatar(av.url)}
                           className={`relative rounded-xl p-1 border-2 transition-all cursor-pointer ${
-                            editAvatar === av.url ? 'border-[#CCFF00]' : 'border-transparent'
+                            editAvatar === av.url ? 'border-[#3B82F6]' : 'border-transparent'
                           }`}
                         >
                           <img src={av.url} alt={av.label} className="w-full aspect-square object-cover rounded-lg" />
@@ -936,7 +936,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
                     <button
                       type="submit"
                       className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-mono text-xs font-bold uppercase transition-all cursor-pointer shadow-md ${
-                        isDark ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]' : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
+                        isDark ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]' : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
                       }`}
                     >
                       <Save className="w-4 h-4" />
@@ -1071,7 +1071,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
                                 onClick={() => handleConfirmSlot(req.id)}
                                 className={`px-5 py-2.5 rounded-xl font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-md active:scale-95 ${
                                   isDark
-                                    ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
+                                    ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
                                     : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
                                 }`}
                                 title="Confirm this slot for the aspirant"
@@ -1114,7 +1114,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
 
                 <div className="text-right font-mono">
                   <div className={`text-[10px] uppercase font-bold ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>Your Verified AIR Rate</div>
-                  <div className="text-xl font-black text-[#CCFF00]">{calculatedRate.display}</div>
+                  <div className="text-xl font-black text-[#60A5FA]">{calculatedRate.display}</div>
                 </div>
               </div>
 
@@ -1126,7 +1126,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
 
                 <div className={`p-4 rounded-2xl border ${isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
                   <span className={`block text-xs font-mono uppercase ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>Honorarium Earned</span>
-                  <strong className="text-2xl font-black text-[#CCFF00] mt-1 block">
+                  <strong className="text-2xl font-black text-[#60A5FA] mt-1 block">
                     ₹{(calculatedRate.rate * 4).toLocaleString()}
                   </strong>
                 </div>
@@ -1138,7 +1138,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
               </div>
 
               <div className={`p-4 rounded-2xl border font-mono text-xs ${isDark ? 'bg-black/30 border-zinc-800 text-zinc-300' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
-                <h4 className="font-bold uppercase tracking-wider mb-2 text-[#CCFF00]">AIR NEETwork Fixed Honorarium Structure:</h4>
+                <h4 className="font-bold uppercase tracking-wider mb-2 text-[#60A5FA]">AIR NEETwork Fixed Honorarium Structure:</h4>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-[11px]">
                   <div className="p-2 rounded-lg border border-zinc-800 bg-zinc-900/50">AIR 1–10: <strong>₹1,500/₹1,999</strong></div>
                   <div className="p-2 rounded-lg border border-zinc-800 bg-zinc-900/50">AIR 10–100: <strong>₹1,299</strong></div>
