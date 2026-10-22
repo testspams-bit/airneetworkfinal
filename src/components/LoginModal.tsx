@@ -27,6 +27,7 @@ import {
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onMentorSuccess?: () => void;
   theme: 'dark' | 'light';
   initialState?: {
     message?: string;
@@ -38,6 +39,7 @@ interface LoginModalProps {
 export const LoginModal: React.FC<LoginModalProps> = ({
   isOpen,
   onClose,
+  onMentorSuccess,
   theme,
   initialState,
 }) => {
@@ -160,6 +162,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           text: result.message || 'Account created successfully! Signing you in...',
           type: 'success',
         });
+        if (role === 'mentor' && onMentorSuccess) {
+          onMentorSuccess();
+        }
         window.setTimeout(onClose, 1000);
       } else {
         await signInWithEmail({
@@ -168,6 +173,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           expectedRole: role,
         });
         setAuthMessage({ text: 'Signed in successfully! Welcome back.', type: 'success' });
+        if (role === 'mentor' && onMentorSuccess) {
+          onMentorSuccess();
+        }
         window.setTimeout(onClose, 800);
       }
     } catch (err) {

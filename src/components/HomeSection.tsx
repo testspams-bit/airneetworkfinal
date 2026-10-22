@@ -1,18 +1,60 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Crown, Gem, Image as ImageIcon, Sparkles, X } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Crown, Gem, Image as ImageIcon, Sparkles, X, Info, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { SessionValueSection } from './SessionValueSection.tsx';
 
 interface HomeSectionProps {
   theme: 'dark' | 'light';
   onBookSession: (tierName: string) => void;
+  onTakeAssessment: () => void;
   onBookRankerSession: () => void;
   onViewMentors: () => void;
 }
 
 const tierPlans = [
-  { name: 'Diamond', description: 'All India Rankers 1–100', note: 'Avg marks', stat: '690–715', price: '3,000', discountPrice: '2,799', icon: Gem },
-  { name: 'Elite', description: 'All India Rankers 200–1000', note: 'Avg marks', stat: '~658–681', price: '2,700', discountPrice: '2,499', icon: Crown },
-  { name: 'Prime', description: 'All India Rankers 1000+', note: 'Avg marks', stat: '650+', price: '2,000', discountPrice: '1,799', icon: Sparkles },
+  {
+    name: 'Purple Tier',
+    rankSubtitle: 'AIR 1 – 100',
+    description: '1-on-1 strategy with Top 100 All India Rankers',
+    note: 'Avg score',
+    stat: '695–715+',
+    originalPrice: '2,200',
+    price: '1,999',
+    discountPrice: '1,999',
+    isOffer: true,
+    rightTag: 'Offer: ₹1,999',
+    accentStyle: 'purple',
+    accentColor: '#c084fc',
+    borderColor: '#a855f7',
+    icon: Crown,
+    features: [
+      '1-on-1 Strategy Session with Top 100 Ranker',
+      'Negative-Marking & Accuracy Diagnostic Audit',
+      'High-Yield Chapter Priority Revision Roadmap',
+      'Direct WhatsApp Slot & Schedule Coordination',
+    ],
+  },
+  {
+    name: 'Diamond Tier',
+    rankSubtitle: 'AIR 100 – 5000',
+    description: '1-on-1 strategy with Top Government GMC Rankers',
+    note: 'Avg score',
+    stat: '640–694',
+    originalPrice: null,
+    price: '1,499',
+    discountPrice: '1,499',
+    isOffer: false,
+    rightTag: 'Fixed: ₹1,499',
+    accentStyle: 'diamond',
+    accentColor: '#38bdf8',
+    borderColor: '#0284c7',
+    icon: Gem,
+    features: [
+      '1-on-1 Strategy Session with GMC Ranker',
+      'Subject-Wise Time Allocation Roadmap',
+      'Physics & Chemistry Numerical Bottleneck Fix',
+      'Direct WhatsApp Slot & Schedule Coordination',
+    ],
+  },
 ];
 
 const neetPyqs = [
@@ -116,7 +158,13 @@ const services = [
   { title: 'Full mentorship batches', note: 'Year-round guidance in focused groups of 25 students, starting at ₹12,000.' },
 ];
 
-export const HomeSection: React.FC<HomeSectionProps> = ({ theme, onBookSession, onBookRankerSession, onViewMentors }) => {
+export const HomeSection: React.FC<HomeSectionProps> = ({
+  theme,
+  onBookSession,
+  onTakeAssessment,
+  onBookRankerSession,
+  onViewMentors,
+}) => {
   const isDark = theme === 'dark';
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedTier, setSelectedTier] = useState<(typeof tierPlans)[number] | null>(null);
@@ -244,14 +292,30 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ theme, onBookSession, 
           <h1 id="home-title" className="home-intro__title home-intro__title--tagline"><span>The NEET race</span><span>is real.</span></h1>
           <p className="home-intro__identity home-intro__identity--ask">Consult those who cleared</p>
           <div className="home-intro__actions">
-            <button className="home-intro__action" type="button" onClick={onBookRankerSession}>Book 1:1 session with a ranker <ArrowUpRight aria-hidden="true" /></button>
-            <a className="home-intro__action home-intro__action--primary home-intro__action--assessment" href="#diagnostic">Take assessment <ArrowUpRight aria-hidden="true" /></a>
+            <button
+              className="home-intro__action cursor-pointer"
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('pricing-title');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                else onBookRankerSession();
+              }}
+            >
+              Book 1:1 session with a ranker <ArrowUpRight aria-hidden="true" />
+            </button>
+            <button
+              className="home-intro__action home-intro__action--primary home-intro__action--assessment cursor-pointer"
+              type="button"
+              onClick={onTakeAssessment}
+            >
+              Take assessment <ArrowUpRight aria-hidden="true" />
+            </button>
           </div>
           <p className="home-intro__disclaimer">Approximate 2026 figures. Ratios compare seat counts with registered aspirants, not individual admission odds; seat counts may change during counselling.</p>
           <div className="home-intro__links">
             <a href="#services-title">Explore our services <ArrowUpRight aria-hidden="true" /></a>
             <span aria-hidden="true">|</span>
-            <a href="#pricing-title">Convince parents to pay <ArrowUpRight aria-hidden="true" /></a>
+            <a href="#pricing-title">Convince me to pay <ArrowUpRight aria-hidden="true" /></a>
           </div>
         </div>
 
@@ -334,38 +398,246 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ theme, onBookSession, 
         </div>
       </section>
 
-      <section className="home-pricing" aria-labelledby="pricing-title">
-        <div className="home-pricing__heading">
-          <div>
-            <div className="home-eyebrow"><span className="home-eyebrow__mark" />MENTORSHIP / PRICING</div>
-            <h2 id="pricing-title" className="home-pricing__title">Mentor tiers</h2>
+      <section className="home-pricing py-12 border-t border-[var(--home-line)]" aria-labelledby="pricing-title">
+        <div className="flex flex-col items-center justify-center text-center mb-8 sm:mb-10">
+          <div className="home-eyebrow flex items-center justify-center gap-2 mb-2">
+            <span className="home-eyebrow__mark" />
+            MENTORSHIP / PRICING
           </div>
-          <span className="home-pricing__index">03 PLANS</span>
+          <h2
+            id="pricing-title"
+            className={`text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-2 ${
+              isDark ? 'text-white' : 'text-zinc-900'
+            }`}
+          >
+            Mentor tiers
+          </h2>
+          <span className="text-xs font-mono tracking-widest text-zinc-400 uppercase">
+            02 PLANS · 1-ON-1 TOPPER STRATEGY SESSIONS
+          </span>
         </div>
-        <div className="home-pricing__grid">
-          {tierPlans.map((tier) => {
-            const Icon = tier.icon;
-            return (
-              <article className={`home-tier-card home-tier-card--${tier.name.toLowerCase()}`} key={tier.name}>
-                <div className="home-tier-card__top">
-                  <h3>{tier.name}</h3>
-                  <span className="home-tier-card__icon"><Icon aria-hidden="true" /></span>
-                </div>
-                <div className="home-tier-card__details">
-                  <p>{tier.description}</p>
-                  {tier.note && <div className="home-tier-card__stat"><span>{tier.note}</span><strong>{tier.stat}</strong></div>}
-                </div>
-                <div className="home-tier-card__price-bar"><strong className="home-tier-card__current-price"><small>₹</small>{tier.price}</strong></div>
-                <div className="home-tier-card__actions">
-                  <button type="button" className="home-tier-card__discount" onClick={() => openDiscountQuestion(tier)} aria-label={`Want a discount? Solve a question and get it for ₹${tier.discountPrice}`}>
-                    Want a discount? <span>Solve a question and get it for ₹{tier.discountPrice}</span>
-                  </button>
-                  <span className="home-tier-card__action-divider" aria-hidden="true" />
-                  <button type="button" onClick={() => setSelectedTier(tier)} aria-label={`Know more about ${tier.name}`}>Know more <ArrowUpRight aria-hidden="true" /></button>
-                </div>
-              </article>
-            );
-          })}
+
+        {/* Outer wrapper: keeps both the two cards and the disclaimer note in the exact same width bounds so their borders align */}
+        <div className="max-w-[780px] mx-auto w-full px-3 sm:px-0">
+          {/* Two cards start from the middle of the page to the left and right */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch w-full">
+            {tierPlans.map((tier) => {
+              const Icon = tier.icon;
+              const isCardPurple = tier.accentStyle === 'purple';
+              return (
+                <article
+                  className={`p-6 sm:p-7 rounded-3xl border transition-all duration-300 flex flex-col justify-between cursor-pointer hover:scale-[1.015] min-h-[520px] sm:min-h-[550px] ${
+                    isCardPurple
+                      ? isDark
+                        ? 'bg-gradient-to-b from-[#280c48] via-[#18072e] to-[#0e041a] border-purple-500/50 shadow-[0_12px_40px_rgba(168,85,247,0.22)] hover:border-purple-400'
+                        : 'bg-gradient-to-b from-purple-100/95 via-purple-50/70 to-white border-purple-300 shadow-xl hover:border-purple-400'
+                      : isDark
+                      ? 'bg-gradient-to-b from-[#0b2b4e] via-[#06182e] to-[#030d1a] border-sky-500/50 shadow-[0_12px_40px_rgba(14,165,233,0.22)] hover:border-sky-400'
+                      : 'bg-gradient-to-b from-sky-100/95 via-sky-50/70 to-white border-sky-300 shadow-xl hover:border-sky-400'
+                  }`}
+                  key={tier.name}
+                  onClick={() => onBookSession(tier.name)}
+                >
+                  <div className="flex flex-col flex-1">
+                    {/* Top Row: Icon Badge & Right Tag */}
+                    <div className="flex items-center justify-between gap-3 mb-4">
+                      <div
+                        className="w-10 h-10 rounded-2xl flex items-center justify-center border shadow-inner shrink-0"
+                        style={{
+                          borderColor: `${tier.borderColor}60`,
+                          color: tier.accentColor,
+                          backgroundColor: isDark ? `${tier.borderColor}20` : `${tier.borderColor}15`,
+                        }}
+                      >
+                        <Icon className="w-5 h-5" aria-hidden="true" />
+                      </div>
+
+                      <span
+                        className="text-[10px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full border shadow-sm"
+                        style={{
+                          borderColor: `${tier.borderColor}70`,
+                          color: tier.accentColor,
+                          backgroundColor: isDark ? `${tier.borderColor}25` : `${tier.borderColor}15`,
+                        }}
+                      >
+                        {tier.rightTag}
+                      </span>
+                    </div>
+
+                    {/* Tier Name & Rank Subtitle */}
+                    <div className="mb-3">
+                      <h3
+                        className={`text-2xl sm:text-3xl font-extrabold uppercase tracking-tight ${
+                          isDark ? 'text-white' : 'text-zinc-900'
+                        }`}
+                      >
+                        {tier.name}
+                      </h3>
+                      <div
+                        className="text-xs font-mono font-bold tracking-wider mt-1 uppercase"
+                        style={{ color: tier.accentColor }}
+                      >
+                        {tier.rankSubtitle}
+                      </div>
+                      <p className={`text-xs mt-2 leading-relaxed ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                        {tier.description}
+                      </p>
+                    </div>
+
+                    {/* Score Benchmark Callout */}
+                    <div
+                      className="p-3 rounded-xl border flex items-center justify-between text-xs font-mono mb-4"
+                      style={{
+                        borderColor: isDark ? `${tier.borderColor}30` : `${tier.borderColor}40`,
+                        backgroundColor: isDark ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.6)',
+                      }}
+                    >
+                      <span className={isDark ? 'text-zinc-400' : 'text-zinc-600'}>{tier.note}:</span>
+                      <strong className="text-sm font-bold tracking-wide" style={{ color: tier.accentColor }}>
+                        {tier.stat}
+                      </strong>
+                    </div>
+
+                    {/* Elongated feature bullets */}
+                    <div className="space-y-2.5 mb-5 flex-1">
+                      {tier.features.map((feat, idx) => (
+                        <div key={idx} className="flex items-start gap-2 text-xs">
+                          <CheckCircle2
+                            className="w-4 h-4 shrink-0 mt-0.5"
+                            style={{ color: tier.accentColor }}
+                          />
+                          <span className={isDark ? 'text-zinc-300' : 'text-zinc-700'}>{feat}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bottom Action Area */}
+                  <div className="space-y-3 pt-3 border-t border-white/10 mt-auto">
+                    {/* Side-by-side row: Smaller Price button on the left, Book Now button to the right */}
+                    <div className="flex items-center gap-2.5">
+                      {/* Smaller Price Button on the Left */}
+                      <div
+                        className="py-1.5 px-3 rounded-xl border flex flex-col items-center justify-center shrink-0 min-w-[95px] text-center"
+                        style={{
+                          borderColor: isCardPurple ? 'rgba(192, 132, 252, 0.6)' : 'rgba(56, 189, 248, 0.6)',
+                          backgroundColor: isDark
+                            ? isCardPurple
+                              ? 'rgba(168, 85, 247, 0.2)'
+                              : 'rgba(14, 165, 233, 0.2)'
+                            : isCardPurple
+                            ? 'rgba(233, 213, 255, 0.8)'
+                            : 'rgba(224, 242, 254, 0.8)',
+                        }}
+                      >
+                        {tier.originalPrice ? (
+                          <div className="flex items-baseline gap-1 leading-none">
+                            <span className="text-[10px] line-through font-mono opacity-65 text-purple-200">
+                              ₹{tier.originalPrice}
+                            </span>
+                            <span className="text-sm sm:text-base font-extrabold font-mono text-purple-100">
+                              ₹{tier.price}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-sm sm:text-base font-extrabold font-mono text-sky-100 leading-none">
+                            ₹{tier.price}
+                          </span>
+                        )}
+                        <span className="text-[9px] font-mono tracking-tight mt-0.5 text-zinc-300">
+                          {tier.isOffer ? 'Offer Price' : 'Session Fee'}
+                        </span>
+                      </div>
+
+                      {/* Book Now Button to the Right of Price button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onBookSession(tier.name);
+                        }}
+                        className="flex-1 py-1.5 px-3 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col items-center justify-center shadow-sm active:scale-95"
+                        style={{
+                          borderColor: isCardPurple ? '#c084fc' : '#38bdf8',
+                          backgroundColor: isDark
+                            ? isCardPurple
+                              ? 'rgba(147, 51, 234, 0.35)'
+                              : 'rgba(2, 132, 199, 0.35)'
+                            : isCardPurple
+                            ? '#f3e8ff'
+                            : '#e0f2fe',
+                          color: isDark ? '#ffffff' : '#0f172a',
+                        }}
+                        aria-label={`Book ${tier.name} slot now for ₹1 token`}
+                      >
+                        <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1 leading-tight">
+                          <span>Book Now</span>
+                          <ArrowUpRight className="w-3.5 h-3.5" style={{ color: tier.accentColor }} />
+                        </span>
+                        <span
+                          className="text-[10px] font-mono tracking-tight"
+                          style={{ color: tier.accentColor }}
+                        >
+                          Request slot at rupee one
+                        </span>
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs pt-1 border-t border-white/10">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDiscountQuestion(tier);
+                        }}
+                        className={`text-[11px] font-mono transition-colors cursor-pointer ${
+                          isDark ? 'text-zinc-300 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
+                        }`}
+                      >
+                        Solve NEET PYQ Question
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedTier(tier);
+                        }}
+                        className={`text-[11px] font-mono font-semibold flex items-center gap-1 cursor-pointer transition-colors ${
+                          isDark ? 'text-white' : 'text-zinc-900'
+                        }`}
+                      >
+                        <span>Know more</span>
+                        <ArrowUpRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          {/* Disclaimer below the rate cards in grey - ends where the cards end */}
+          <div
+            className={`mt-5 p-4 sm:p-5 rounded-2xl border text-xs leading-relaxed w-full transition-all ${
+              isDark
+                ? 'bg-zinc-900/50 border-zinc-800 text-zinc-400'
+                : 'bg-slate-100/80 border-slate-300 text-slate-600'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <Info className="w-4 h-4 text-zinc-500 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-zinc-400 block">
+                  Disclaimer & Advisory Note
+                </span>
+                <p className="text-zinc-500 text-xs leading-relaxed">
+                  We recommend taking our diagnostic assessment first rather than picking a mentor solely based on their All India Rank.
+                  A mentor who mastered the exact negative-mark leakage or physics numerical bottlenecks you face provides more score acceleration
+                  than general high rankers. Token ₹1 reserves and prioritizes your 1-on-1 strategy call; timing is coordinated directly on WhatsApp.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -426,7 +698,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ theme, onBookSession, 
             )}
             <div className="home-discount-dialog__actions">
               {isDiscountUnlocked ? (
-                <button type="button" className="home-tier-dialog__book" onClick={() => setDiscountTier(null)}>Use ₹{discountTier.discountPrice} price</button>
+                <button type="button" className="home-tier-dialog__book" onClick={() => { const t = discountTier.name; setDiscountTier(null); onBookSession(t); }}>Book with ₹{discountTier.discountPrice} Discount</button>
               ) : currentAttempts >= 3 ? (
                 <button type="button" className="home-tier-dialog__book" onClick={() => setDiscountTier(null)}>Close</button>
               ) : !answerChecked ? (

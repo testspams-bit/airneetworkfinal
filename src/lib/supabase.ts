@@ -1,24 +1,65 @@
 import { createClient, type Session, type User } from '@supabase/supabase-js';
 
 const DEFAULT_SUPABASE_URL = 'https://obtlfbkjfnjitgvwmspy.supabase.co';
-const DEFAULT_SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9idGxmYmtqZm5qaXRndndtc3B5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0OTQ1MTYsImV4cCI6MjEwODA3MDUxNn0.Zp9Q007uqGu0E03xW6GGcdlN37KXqBGPQSwdmUouhbM';
+const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_xZYDuelHOc7u1ZjU_14oyg_1rYbYexB';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
+function isValidHttpUrl(val?: string | null): boolean {
+  if (!val || typeof val !== 'string') return false;
+  try {
+    const u = new URL(val.trim());
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+function getSanitizedSupabaseConfig() {
+  const rawUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+  const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
 
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey, {
+  let resolvedUrl = DEFAULT_SUPABASE_URL;
+  let resolvedKey = DEFAULT_SUPABASE_ANON_KEY;
+
+  // Detect if env variables were inverted (URL placed in Key, or Key placed in URL)
+  if (!isValidHttpUrl(rawUrl) && isValidHttpUrl(rawKey)) {
+    resolvedUrl = rawKey;
+    resolvedKey = rawUrl || DEFAULT_SUPABASE_ANON_KEY;
+  } else if (isValidHttpUrl(rawUrl)) {
+    resolvedUrl = rawUrl;
+    resolvedKey = rawKey && !isValidHttpUrl(rawKey) ? rawKey : DEFAULT_SUPABASE_ANON_KEY;
+  } else if (rawKey && !isValidHttpUrl(rawKey)) {
+    resolvedKey = rawKey;
+  }
+
+  if (!isValidHttpUrl(resolvedUrl)) {
+    resolvedUrl = DEFAULT_SUPABASE_URL;
+  }
+
+  return { url: resolvedUrl, key: resolvedKey };
+}
+
+const { url: supabaseUrl, key: supabaseAnonKey } = getSanitizedSupabaseConfig();
+
+export const isSupabaseConfigured = Boolean(isValidHttpUrl(supabaseUrl) && supabaseAnonKey);
+
+let supabaseClient = null;
+if (isSupabaseConfigured) {
+  try {
+    supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
         flowType: 'implicit',
       },
-    })
-  : null;
+    });
+  } catch (initError) {
+    console.warn('[AIR NEETwork] Failed to initialize Supabase client:', initError);
+    supabaseClient = null;
+  }
+}
+
+export const supabase = supabaseClient;
 
 export type AccountRole = 'student_mentee' | 'mentor';
 

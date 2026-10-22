@@ -19,6 +19,8 @@ import { NeetTimer } from './components/NeetTimer.tsx';
 import { HomeSection } from './components/HomeSection.tsx';
 import { MentorSpotlight } from './components/MentorSpotlight.tsx';
 import { BookingModal } from './components/BookingModal.tsx';
+import { BookingPaymentFlow } from './components/BookingPaymentFlow.tsx';
+import { TopperDashboard } from './components/TopperDashboard.tsx';
 import {
   Sun,
   Moon,
@@ -26,6 +28,7 @@ import {
   LogOut,
   Mail,
   User,
+  LayoutDashboard,
 } from 'lucide-react';
 
 export default function App() {
@@ -39,6 +42,7 @@ export default function App() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [bookingMentor, setBookingMentor] = useState<string | undefined>();
   const [bookingTier, setBookingTier] = useState<string | undefined>();
+  const [bookingInitialMode, setBookingInitialMode] = useState<'choose_topper' | 'diagnostic_test' | undefined>();
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUserData | null>(null);
   const signedInEmail = currentUser?.email ?? null;
@@ -91,6 +95,23 @@ export default function App() {
     }
   };
 
+  // If activeNav is 'dashboard', render the dedicated Topper Dashboard with left-side menu bar
+  if (activeNav === 'dashboard') {
+    return (
+      <TopperDashboard
+        theme={theme}
+        userId={currentUser?.id || 'topper_active'}
+        userEmail={currentUser?.email}
+        userName={currentUser?.fullName}
+        onSignOut={async () => {
+          await authSignOut();
+          setActiveNav('home');
+        }}
+        onSwitchToHome={() => setActiveNav('home')}
+      />
+    );
+  }
+
   return (
     <div
       className={`min-h-screen transition-colors duration-200 flex flex-col justify-between pb-16 md:pb-0 ${
@@ -125,6 +146,7 @@ export default function App() {
               theme={theme}
               activeId={activeNav}
               onSelect={setActiveNav}
+              isMentor={currentUser?.role === 'mentor'}
             />
           </div>
 
@@ -178,6 +200,22 @@ export default function App() {
             {/* Authenticated User Status or Log In Button */}
             {currentUser ? (
               <div className="flex items-center gap-2">
+                {currentUser.role === 'mentor' && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveNav('dashboard')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer active:scale-95 shadow-sm ${
+                      isDark
+                        ? 'border-purple-500/50 bg-purple-950/40 text-purple-200 hover:bg-purple-900/50 hover:border-purple-400'
+                        : 'border-purple-300 bg-purple-50 text-purple-900 hover:bg-purple-100'
+                    }`}
+                    title="Open Topper Mentoring Dashboard"
+                  >
+                    <LayoutDashboard className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Topper Dashboard</span>
+                  </button>
+                )}
+
                 <div
                   className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border ${
                     isDark ? 'bg-zinc-900 border-zinc-800 text-zinc-300' : 'bg-slate-100 border-slate-200 text-slate-700'
@@ -262,6 +300,16 @@ export default function App() {
               setIsBookingOpen(true);
             }}
           />
+        ) : activeNav === 'booking' ? (
+          <div className="py-6 sm:py-10">
+            <BookingPaymentFlow
+              theme={theme}
+              initialMentor={bookingMentor}
+              initialTier={bookingTier}
+              onClose={() => setActiveNav('home')}
+              isModal={false}
+            />
+          </div>
         ) : (
           activeNav === 'home' ? (
             <>
@@ -270,12 +318,18 @@ export default function App() {
               onBookSession={(tierName) => {
                 setBookingMentor(undefined);
                 setBookingTier(tierName);
+                setBookingInitialMode(undefined);
+                setIsBookingOpen(true);
+              }}
+              onTakeAssessment={() => {
+                setBookingMentor(undefined);
+                setBookingTier(undefined);
+                setBookingInitialMode('diagnostic_test');
                 setIsBookingOpen(true);
               }}
               onBookRankerSession={() => {
-                setBookingMentor(undefined);
-                setBookingTier(undefined);
-                setIsBookingOpen(true);
+                const el = document.getElementById('pricing-title');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
               onViewMentors={() => setActiveNav('toppers')}
             />
@@ -312,6 +366,7 @@ export default function App() {
         theme={theme}
         activeId={activeNav}
         onSelect={setActiveNav}
+        isMentor={currentUser?.role === 'mentor'}
       />
 
       {/* Fixed customer support representative icon */}
@@ -336,10 +391,12 @@ export default function App() {
           setIsBookingOpen(false);
           setBookingMentor(undefined);
           setBookingTier(undefined);
+          setBookingInitialMode(undefined);
         }}
         theme={theme}
         initialMentor={bookingMentor}
         initialTier={bookingTier}
+        initialMode={bookingInitialMode}
       />
 
       {/* Student & Mentor Login Modal */}
@@ -348,6 +405,9 @@ export default function App() {
         onClose={() => {
           setIsLoginOpen(false);
           setAuthModalState(null);
+        }}
+        onMentorSuccess={() => {
+          setActiveNav('dashboard');
         }}
         theme={theme}
         initialState={authModalState}

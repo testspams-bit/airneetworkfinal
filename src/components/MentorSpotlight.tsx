@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, GraduationCap, CheckCircle2 } from 'lucide-react';
+import { Award, GraduationCap, CheckCircle2, Info, ShieldCheck } from 'lucide-react';
 import { BrandName } from './BrandName.tsx';
 
 interface MentorSpotlightProps {
@@ -74,6 +74,34 @@ export const MentorSpotlight: React.FC<MentorSpotlightProps> = ({
           </p>
         </div>
 
+        {/* Founder Recommendation Advisory Banner */}
+        <div
+          className={`mb-12 p-4 sm:p-5 rounded-2xl border transition-all ${
+            isDark
+              ? 'bg-amber-950/25 border-amber-500/40 text-amber-200'
+              : 'bg-amber-50/95 border-amber-300 text-amber-900 shadow-sm'
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400 shrink-0 mt-0.5">
+              <Info className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <div className="text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2">
+                <span>[ FOUNDER RECOMMENDATION ]</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 font-sans font-semibold">
+                  Take Assessment First
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm font-medium leading-relaxed">
+                <strong>We recommend you to take our assessment first and not just go for their Rank.</strong>{' '}
+                A mentor whose AIR is 184 who cracked your exact weak spot (e.g. Organic mechanisms or physics numericals)
+                will transform your prep far more than selecting purely based on single-digit rank.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Mentor Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {mentors.map((mentor) => (
@@ -140,14 +168,14 @@ export const MentorSpotlight: React.FC<MentorSpotlightProps> = ({
               <div className={`pt-6 mt-6 border-t ${isDark ? 'border-zinc-800' : 'border-slate-100'}`}>
                 <button
                   onClick={() => onSelectMentor(mentor.name)}
-                  className={`w-full py-3 px-4 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                  className={`w-full py-3 px-4 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95 ${
                     isDark
-                      ? 'bg-zinc-900 text-[#CCFF00] border border-[#CCFF00]/30 hover:bg-[#CCFF00] hover:text-black'
+                      ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
                       : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
                   }`}
                 >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Request Session with {mentor.name.split(' ')[0]}</span>
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Book Slot with {mentor.name.split(' ')[0]} (₹1)</span>
                 </button>
               </div>
             </div>

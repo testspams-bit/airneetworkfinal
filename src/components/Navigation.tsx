@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Trophy, Target, Globe, Info } from 'lucide-react';
+import { Home, Trophy, Target, Globe, Info, LayoutDashboard } from 'lucide-react';
 
 export interface NavItem {
   id: string;
@@ -15,25 +15,33 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'about', label: 'About Us', icon: Info },
 ];
 
+export const MENTOR_NAV_ITEMS: NavItem[] = [
+  { id: 'dashboard', label: 'Topper Portal', icon: LayoutDashboard },
+  ...NAV_ITEMS,
+];
+
 interface DesktopNavProps {
   theme: 'dark' | 'light';
   activeId: string;
   onSelect: (id: string) => void;
+  isMentor?: boolean;
 }
 
 export const DesktopNav: React.FC<DesktopNavProps> = ({
   theme,
   activeId,
   onSelect,
+  isMentor = false,
 }) => {
   const isDark = theme === 'dark';
+  const navList = isMentor ? MENTOR_NAV_ITEMS : NAV_ITEMS;
 
   return (
     <nav
       aria-label="Main navigation"
-      className="desktop-nav hidden items-center gap-3 md:flex"
+      className="desktop-nav hidden items-center gap-2.5 md:flex"
     >
-      {NAV_ITEMS.map((item) => {
+      {navList.map((item) => {
         const Icon = item.icon;
         const isActive = activeId === item.id;
 
@@ -75,14 +83,17 @@ interface MobileBottomNavProps {
   theme: 'dark' | 'light';
   activeId: string;
   onSelect: (id: string) => void;
+  isMentor?: boolean;
 }
 
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   theme,
   activeId,
   onSelect,
+  isMentor = false,
 }) => {
   const isDark = theme === 'dark';
+  const navList = isMentor ? MENTOR_NAV_ITEMS : NAV_ITEMS;
 
   return (
     <nav
@@ -94,7 +105,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       aria-label="Mobile Bottom Navigation"
     >
       <div className="flex items-center justify-around max-w-md mx-auto">
-        {NAV_ITEMS.map((item) => {
+        {navList.map((item) => {
           const Icon = item.icon;
           const isActive = activeId === item.id;
 
