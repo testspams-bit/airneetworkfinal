@@ -17,7 +17,7 @@ export async function generateChatReply(messages: ChatTurn[]) {
 
   const ai = new GoogleGenAI({ apiKey });
   const response = await ai.models.generateContent({
-    model: 'gemini-3.8-flash',
+    model: 'gemini-flash-latest',
     contents: `You are the AIR NEETwork support assistant. Help visitors with NEET mentorship, student support, and contacting the team. Be concise, friendly, and do not invent guarantees or admissions outcomes.\n\nConversation:\n${conversation}\nAssistant:`,
   });
 

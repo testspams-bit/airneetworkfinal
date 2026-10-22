@@ -1,6 +1,8 @@
-import React from 'react';
-import { Award, GraduationCap, CheckCircle2, Info, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { GraduationCap, CheckCircle2, Info, ShieldCheck } from 'lucide-react';
 import { BrandName } from './BrandName.tsx';
+import { getAllRegisteredToppers, AVATAR_PRESETS } from '../utils/topperStorage.ts';
+import { calculateSessionRateByAir, type TopperProfile } from '../types/topper.ts';
 
 interface MentorSpotlightProps {
   theme: 'dark' | 'light';
@@ -12,74 +14,58 @@ export const MentorSpotlight: React.FC<MentorSpotlightProps> = ({
   onSelectMentor,
 }) => {
   const isDark = theme === 'dark';
+  const [toppers, setToppers] = useState<TopperProfile[]>(() => getAllRegisteredToppers());
 
-  const mentors = [
-    {
-      name: 'Aryan Sharma',
-      rank: 'AIR 48',
-      score: '710/720',
-      college: 'AIIMS New Delhi',
-      year: 'MBBS 2nd Year',
-      focus: 'Physics Numericals & Speed Accuracy',
-      bio: 'Cracked NEET in his first attempt from home without mega-coaching. Specializes in turning Physics into a 160+ scoring engine through timed question sets.',
-    },
-    {
-      name: 'Sneha Patel',
-      rank: 'AIR 112',
-      score: '700/720',
-      college: 'VMMC & Safdarjung Hospital',
-      year: 'MBBS 2nd Year',
-      focus: 'NCERT Biology Active Recall & Mnemonics',
-      bio: 'Scored a perfect 360/360 in Biology. Guides aspirants through 4-stage active NCERT line extraction and eliminating assertion-reason confusion.',
-    },
-    {
-      name: 'Rohan Verma',
-      rank: 'AIR 184',
-      score: '695/720',
-      college: 'Maulana Azad Medical College (MAMC)',
-      year: 'MBBS 3rd Year',
-      focus: 'Organic Chemistry & Negative Mark Reduction',
-      bio: 'Overcame a 510 baseline in mock exams to achieve 695 in NEET UG. Teaches the exact error-log matrix used to eliminate 40+ negative marks in final months.',
-    },
-  ];
+  useEffect(() => {
+    const handleUpdate = () => {
+      setToppers(getAllRegisteredToppers());
+    };
+
+    window.addEventListener('airneet_toppers_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('airneet_toppers_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
 
   return (
-    <section id="mentors" className="py-24 relative border-t border-zinc-800">
+    <section id="mentors" className={`py-12 sm:py-20 relative border-t ${isDark ? 'border-zinc-800' : 'border-slate-200'}`}>
       <div className="max-w-[1560px] mx-auto px-4 sm:px-8 md:px-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
           <div>
             <div
               className={`text-xs font-mono font-bold tracking-widest uppercase mb-3 ${
                 isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'
               }`}
             >
-              [ VERIFIED AIR MENTORS ]
+              [ VERIFIED AIR MENTORS · TOP RANKERS ]
             </div>
             <h2
               className={`text-3xl sm:text-5xl font-extrabold tracking-tight uppercase leading-[1.05] ${
-                isDark ? 'text-white' : 'text-slate-950'
+                isDark ? 'text-white' : 'text-slate-900'
               }`}
             >
-              Guided by Those Who've <br />
+              Guided by Those Who&apos;ve <br />
               Walked The Stage.
             </h2>
           </div>
           <p
             className={`max-w-md text-sm leading-relaxed ${
-              isDark ? 'text-zinc-400' : 'text-slate-600'
+              isDark ? 'text-zinc-300' : 'text-slate-700'
             }`}
           >
-            Every mentor in <BrandName theme={theme} className="text-sm font-semibold" /> is personally vetted, holds an All India Rank under 1000,
+            Every mentor in <BrandName theme={theme} className="text-sm font-semibold" /> is personally vetted, holds an All India Rank,
             and maintains active medical student credentials at top institutions.
           </p>
         </div>
 
         {/* Founder Recommendation Advisory Banner */}
         <div
-          className={`mb-12 p-4 sm:p-5 rounded-2xl border transition-all ${
+          className={`mb-10 p-4 sm:p-5 rounded-2xl border transition-all ${
             isDark
               ? 'bg-amber-950/25 border-amber-500/40 text-amber-200'
-              : 'bg-amber-50/95 border-amber-300 text-amber-900 shadow-sm'
+              : 'bg-amber-50 border-amber-300 text-amber-950 shadow-xs'
           }`}
         >
           <div className="flex items-start gap-3">
@@ -88,98 +74,123 @@ export const MentorSpotlight: React.FC<MentorSpotlightProps> = ({
             </div>
             <div className="space-y-1">
               <div className="text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2">
-                <span>[ FOUNDER RECOMMENDATION ]</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 font-sans font-semibold">
-                  Take Assessment First
+                <span className="text-amber-500 dark:text-amber-400 font-black">[ ADVISORY ]</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-800 dark:text-amber-300 font-sans font-bold">
+                  Matched by Weak Spot
                 </span>
               </div>
-              <p className="text-xs sm:text-sm font-medium leading-relaxed">
-                <strong>We recommend you to take our assessment first and not just go for their Rank.</strong>{' '}
-                A mentor whose AIR is 184 who cracked your exact weak spot (e.g. Organic mechanisms or physics numericals)
-                will transform your prep far more than selecting purely based on single-digit rank.
+              <p className={`text-xs sm:text-sm font-medium leading-relaxed ${isDark ? 'text-zinc-200' : 'text-slate-800'}`}>
+                <strong>We recommend matching mentors by your specific subject bottleneck, not just single-digit rank.</strong>{' '}
+                A mentor who cracked your exact weak spot (e.g. Organic reaction mechanisms or physics rotational numericals)
+                will transform your NEET score far more effectively.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Mentor Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {mentors.map((mentor) => (
-            <div
-              key={mentor.name}
-              className={`p-8 rounded-2xl flex flex-col justify-between transition-all border ${
-                isDark
-                  ? 'bg-zinc-950 border-zinc-800 hover:border-zinc-700'
-                  : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
-              }`}
-            >
-              <div>
-                {/* Clean unboxed rank metadata (Zero pill rule) */}
-                <div
-                  className={`flex items-center gap-2 text-xs font-mono font-semibold mb-3 ${
-                    isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'
-                  }`}
-                >
-                  <Award className="w-4 h-4" />
-                  <span>{mentor.rank}</span>
-                  <span aria-hidden="true">·</span>
-                  <span>NEET {mentor.score}</span>
+        {/* Dynamic Topper Cards Grid — 70% Photo Area & 30% Details */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
+          {toppers.map((mentor) => {
+            const rateInfo = calculateSessionRateByAir(mentor.airRank);
+            const avatar = mentor.avatarUrl || AVATAR_PRESETS[0].url;
+
+            return (
+              <div
+                key={mentor.id || mentor.name}
+                className={`rounded-3xl overflow-hidden flex flex-col group transition-all duration-300 hover:-translate-y-1.5 border ${
+                  isDark
+                    ? 'bg-[#121217] border-zinc-800 hover:border-zinc-700 shadow-xl shadow-black/50'
+                    : 'bg-white border-slate-200 hover:border-slate-300 shadow-md hover:shadow-xl'
+                }`}
+              >
+                {/* 70% Photo Area */}
+                <div className="relative w-full aspect-[4/5] overflow-hidden bg-zinc-950">
+                  <img
+                    src={avatar}
+                    alt={mentor.name}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
+                  />
+
+                  {/* Top floating badges: AIR Rank + Fixed Rate */}
+                  <div className="absolute top-3 inset-x-3 flex items-center justify-between z-10">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400 text-black font-mono font-black text-xs shadow-lg shadow-amber-400/20 tracking-wider">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-black" />
+                      AIR {mentor.airRank}
+                    </span>
+
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[#CCFF00] font-mono text-xs font-black shadow-md">
+                      {rateInfo.display}
+                    </span>
+                  </div>
                 </div>
 
-                <h3
-                  className={`text-xl font-bold tracking-tight mb-1 ${
-                    isDark ? 'text-white' : 'text-slate-900'
-                  }`}
-                >
-                  {mentor.name}
-                </h3>
+                {/* Details Area: ONLY Name, AIR, Marks, College */}
+                <div className="p-4 sm:p-5 flex flex-col justify-between flex-1 gap-4">
+                  <div className="space-y-2.5">
+                    {/* Name */}
+                    <div>
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-bold">
+                        Name
+                      </div>
+                      <h3 className={`text-lg sm:text-xl font-black tracking-tight leading-snug ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        {mentor.name}
+                      </h3>
+                    </div>
 
-                {/* College & Program metadata */}
-                <div
-                  className={`flex items-center gap-2 text-xs mb-4 ${
-                    isDark ? 'text-zinc-400' : 'text-slate-500'
-                  }`}
-                >
-                  <GraduationCap className="w-3.5 h-3.5" />
-                  <span>{mentor.college}</span>
-                  <span aria-hidden="true">·</span>
-                  <span>{mentor.year}</span>
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-dashed border-zinc-200 dark:border-zinc-800">
+                      {/* AIR */}
+                      <div>
+                        <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-bold">
+                          AIR
+                        </div>
+                        <div className="text-sm font-mono font-black text-amber-500 dark:text-amber-400">
+                          AIR {mentor.airRank}
+                        </div>
+                      </div>
+
+                      {/* Marks */}
+                      <div>
+                        <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-bold">
+                          Marks
+                        </div>
+                        <div className="text-sm font-mono font-extrabold text-emerald-600 dark:text-emerald-400">
+                          {mentor.totalMarks}/720
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* College */}
+                    <div className="pt-2 border-t border-dashed border-zinc-200 dark:border-zinc-800">
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-bold flex items-center gap-1">
+                        <GraduationCap className="w-3 h-3 text-amber-500" />
+                        <span>College</span>
+                      </div>
+                      <div className={`text-xs sm:text-sm font-semibold leading-snug line-clamp-2 mt-0.5 ${isDark ? 'text-zinc-200' : 'text-slate-800'}`}>
+                        {mentor.currentCollege}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Booking CTA Button */}
+                  <div className={`pt-3 border-t ${isDark ? 'border-zinc-800' : 'border-slate-200'}`}>
+                    <button
+                      type="button"
+                      onClick={() => onSelectMentor(mentor.name)}
+                      className={`w-full py-2.5 px-4 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-95 ${
+                        isDark
+                          ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33] shadow-[#CCFF00]/10'
+                          : 'bg-[#0066FF] text-white hover:bg-[#0052cc] shadow-[#0066FF]/20'
+                      }`}
+                    >
+                      <ShieldCheck className="w-4 h-4" />
+                      <span>Book Strategy Session</span>
+                    </button>
+                  </div>
                 </div>
-
-                <div
-                  className={`text-xs font-medium px-3 py-2 rounded-lg mb-4 ${
-                    isDark
-                      ? 'bg-zinc-900 border border-zinc-800 text-zinc-300'
-                      : 'bg-slate-50 border border-slate-100 text-slate-700'
-                  }`}
-                >
-                  <span className="font-semibold text-emerald-500">Focus:</span> {mentor.focus}
-                </div>
-
-                <p
-                  className={`text-sm leading-relaxed ${
-                    isDark ? 'text-zinc-400' : 'text-slate-600'
-                  }`}
-                >
-                  {mentor.bio}
-                </p>
               </div>
-
-              <div className={`pt-6 mt-6 border-t ${isDark ? 'border-zinc-800' : 'border-slate-100'}`}>
-                <button
-                  onClick={() => onSelectMentor(mentor.name)}
-                  className={`w-full py-3 px-4 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95 ${
-                    isDark
-                      ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
-                      : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
-                  }`}
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Book Slot with {mentor.name.split(' ')[0]} (₹1)</span>
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

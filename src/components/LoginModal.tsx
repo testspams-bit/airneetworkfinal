@@ -28,11 +28,13 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onMentorSuccess?: () => void;
+  onOpenOnboarding?: () => void;
   theme: 'dark' | 'light';
   initialState?: {
     message?: string;
     mode?: 'login' | 'signup';
     role?: AccountRole;
+    forceStep?: 'role' | 'auth';
   } | null;
 }
 
@@ -40,6 +42,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   isOpen,
   onClose,
   onMentorSuccess,
+  onOpenOnboarding,
   theme,
   initialState,
 }) => {
@@ -69,11 +72,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       setIsEmailSubmitting(false);
       setIsGoogleSubmitting(false);
 
-      if (initialState?.message) {
-        setStep('auth');
-        setAuthMode(initialState.mode || 'login');
+      if (initialState) {
+        // ALWAYS show role selection window first unless explicitly forced to 'auth'
+        const targetStep = initialState.forceStep === 'auth' ? 'auth' : 'role';
+        setStep(targetStep);
+        if (initialState.mode) setAuthMode(initialState.mode);
         if (initialState.role) setRole(initialState.role);
-        setAuthMessage({ text: initialState.message, type: 'error' });
+        if (initialState.message) {
+          setAuthMessage({ text: initialState.message, type: 'error' });
+        } else {
+          setAuthMessage(null);
+        }
       } else {
         const pendingError = getAndClearAuthError();
         if (pendingError) {
@@ -240,14 +249,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           <Logo theme={theme} size="sm" showText={false} />
           <h2 className="mt-2 text-base font-bold tracking-tight">
             {step === 'role'
-              ? 'Select Account Role'
+              ? authMode === 'login'
+                ? 'Log In'
+                : 'Register'
               : authMode === 'login'
-              ? `Sign In as ${role === 'mentor' ? 'Mentor' : 'Student'}`
-              : `Create ${role === 'mentor' ? 'Mentor' : 'Student'} Account`}
+              ? `Log In as ${role === 'mentor' ? 'AIR Mentor' : 'NEET Aspirant'}`
+              : `Register as ${role === 'mentor' ? 'AIR Mentor' : 'NEET Aspirant'}`}
           </h2>
           <p className="text-xs text-zinc-400 mt-0.5">
             {step === 'role'
-              ? 'Personalized 1-on-1 NEET Mentoring'
+              ? 'Select whether you are an Aspirant or a Mentor'
               : isSupabaseConfigured
               ? 'Secured with Supabase Cloud Authentication'
               : 'Sign in with Google or Email + Password'}
@@ -257,63 +268,82 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         {/* STEP 1: Select Role */}
         {step === 'role' ? (
           <div className="space-y-4">
+
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 aria-pressed={role === 'student_mentee'}
                 onClick={() => handleRoleSelect('student_mentee')}
-                className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-3 text-center transition cursor-pointer ${
+                className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border p-3 text-center transition cursor-pointer relative ${
                   isDark
                     ? role === 'student_mentee'
-                      ? 'border-[#CCFF00]/50 bg-[#CCFF00]/10 text-white shadow-sm shadow-[#CCFF00]/10'
+                      ? 'border-[#0066FF] bg-[#0066FF]/15 text-white shadow-md shadow-[#0066FF]/15 ring-2 ring-[#0066FF]/60'
                       : 'border-zinc-800 text-zinc-300 hover:border-zinc-700 bg-zinc-900/40'
                     : role === 'student_mentee'
-                    ? 'border-[#0066FF]/50 bg-[#0066FF]/10 text-slate-900 shadow-sm shadow-[#0066FF]/10'
+                    ? 'border-[#0066FF] bg-[#0066FF]/10 text-slate-900 shadow-md shadow-[#0066FF]/10 ring-2 ring-[#0066FF]/50'
                     : 'border-slate-200 text-slate-700 hover:border-slate-300 bg-slate-50'
                 }`}
               >
                 <div
                   className={`p-2 rounded-full ${
                     role === 'student_mentee'
-                      ? isDark ? 'bg-[#CCFF00]/20 text-[#CCFF00]' : 'bg-[#0066FF]/20 text-[#0066FF]'
-                      : isDark ? 'bg-zinc-800 text-zinc-400' : 'bg-slate-200 text-slate-500'
+                      ? isDark
+                        ? 'bg-[#0066FF]/30 text-[#60a5fa]'
+                        : 'bg-[#0066FF]/20 text-[#0066FF]'
+                      : isDark
+                      ? 'bg-zinc-800 text-zinc-400'
+                      : 'bg-slate-200 text-slate-500'
                   }`}
                 >
                   <GraduationCap className="h-6 w-6" />
                 </div>
                 <div>
                   <span className="block text-sm font-bold">Student Mentee</span>
-                  <span className="text-[10px] text-zinc-400">NEET UG Aspirant</span>
+                  <span className="text-[10px] text-zinc-400 block mt-0.5">NEET UG Aspirant</span>
                 </div>
+                {role === 'student_mentee' && (
+                  <div className="absolute top-2 right-2">
+                    <span className="w-2 h-2 rounded-full bg-[#0066FF] block shadow-sm shadow-[#0066FF]" />
+                  </div>
+                )}
               </button>
 
               <button
                 type="button"
                 aria-pressed={role === 'mentor'}
                 onClick={() => handleRoleSelect('mentor')}
-                className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-3 text-center transition cursor-pointer ${
+                className={`flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border p-3 text-center transition cursor-pointer relative ${
                   isDark
                     ? role === 'mentor'
-                      ? 'border-[#CCFF00]/50 bg-[#CCFF00]/10 text-white shadow-sm shadow-[#CCFF00]/10'
+                      ? 'border-[#CCFF00] bg-[#CCFF00]/15 text-white shadow-md shadow-[#CCFF00]/15 ring-2 ring-[#CCFF00]/60'
                       : 'border-zinc-800 text-zinc-300 hover:border-zinc-700 bg-zinc-900/40'
                     : role === 'mentor'
-                    ? 'border-[#0066FF]/50 bg-[#0066FF]/10 text-slate-900 shadow-sm shadow-[#0066FF]/10'
+                    ? 'border-emerald-600 bg-emerald-500/10 text-slate-900 shadow-md shadow-emerald-500/10 ring-2 ring-emerald-600/50'
                     : 'border-slate-200 text-slate-700 hover:border-slate-300 bg-slate-50'
                 }`}
               >
                 <div
                   className={`p-2 rounded-full ${
                     role === 'mentor'
-                      ? isDark ? 'bg-[#CCFF00]/20 text-[#CCFF00]' : 'bg-[#0066FF]/20 text-[#0066FF]'
-                      : isDark ? 'bg-zinc-800 text-zinc-400' : 'bg-slate-200 text-slate-500'
+                      ? isDark
+                        ? 'bg-[#CCFF00]/25 text-[#CCFF00]'
+                        : 'bg-emerald-600/20 text-emerald-700'
+                      : isDark
+                      ? 'bg-zinc-800 text-zinc-400'
+                      : 'bg-slate-200 text-slate-500'
                   }`}
                 >
                   <BookOpenCheck className="h-6 w-6" />
                 </div>
                 <div>
                   <span className="block text-sm font-bold">AIR Mentor</span>
-                  <span className="text-[10px] text-zinc-400">Top Ranker / Medic</span>
+                  <span className="text-[10px] text-zinc-400 block mt-0.5">Top Ranker / MBBS</span>
                 </div>
+                {role === 'mentor' && (
+                  <div className="absolute top-2 right-2">
+                    <span className="w-2 h-2 rounded-full bg-[#CCFF00] dark:bg-[#CCFF00] block shadow-sm shadow-[#CCFF00]" />
+                  </div>
+                )}
               </button>
             </div>
 
@@ -325,13 +355,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 setIsGoogleSubmitting(false);
                 setAuthMessage(null);
               }}
-              className={`w-full rounded-xl py-2.5 text-sm font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm ${
+              className={`w-full rounded-xl py-3 text-sm font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-98 ${
                 isDark
                   ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
                   : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
               }`}
             >
-              Continue to {role === 'mentor' ? 'Mentor Portal' : 'Student Access'}
+              <span>
+                Continue as {role === 'mentor' ? 'AIR Mentor' : 'NEET Aspirant'}
+              </span>
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
@@ -353,33 +385,46 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   isDark ? 'bg-zinc-800 text-[#CCFF00]' : 'bg-blue-50 text-[#0066FF]'
                 }`}
               >
-                {role === 'mentor' ? 'Mentor Mode' : 'Student Mode'}
+                {role === 'mentor' ? 'AIR Mentor' : 'NEET Aspirant'}
               </span>
             </div>
 
-            {/* Log in / Register Toggle */}
-            <div
-              className={`mb-4 flex rounded-xl border p-1 text-xs font-semibold ${
-                isDark ? 'border-zinc-800 bg-zinc-900 text-zinc-400' : 'border-slate-200 bg-slate-100 text-slate-600'
-              }`}
-            >
-              {(['login', 'signup'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => handleModeSwitch(mode)}
-                  className={`flex-1 rounded-lg py-2 transition cursor-pointer ${
-                    authMode === mode
-                      ? isDark
-                        ? 'bg-black text-[#CCFF00] shadow-sm'
-                        : 'bg-white text-[#0066FF] shadow-sm'
-                      : ''
-                  }`}
-                >
-                  {mode === 'login' ? 'Log in' : 'Register'}
-                </button>
-              ))}
-            </div>
+            {role === 'mentor' && authMode === 'signup' && (
+              <div
+                className={`mb-4 p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 ${
+                  isDark
+                    ? 'bg-amber-950/30 border-amber-500/30 text-amber-200'
+                    : 'bg-amber-50 border-amber-300 text-amber-900'
+                }`}
+              >
+                <div className="flex items-start gap-2">
+                  <GraduationCap className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="leading-snug">
+                    <span className="font-bold block">Mentor Registration — Step 1</span>
+                    <span className="text-[11px] opacity-80">
+                      Create credentials. Step 2 configures your NEET AIR, MBBS college & monthly free slots.
+                    </span>
+                  </div>
+                </div>
+                {onOpenOnboarding && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenOnboarding();
+                    }}
+                    className={`px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold whitespace-nowrap transition cursor-pointer shrink-0 border self-start sm:self-center ${
+                      isDark
+                        ? 'bg-amber-400/20 border-amber-400/40 text-amber-300 hover:bg-amber-400/30'
+                        : 'bg-amber-200/80 border-amber-400 text-amber-950 hover:bg-amber-200'
+                    }`}
+                    title="View Step 2: 11-field NEET Profile & Slot Manager"
+                  >
+                    Preview Step 2 Form →
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* Google Authentication Button */}
             <button
@@ -439,20 +484,22 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               {/* If Registering: Name field */}
               {authMode === 'signup' && (
                 <div>
-                  <label className="mb-1 flex items-center gap-1.5 text-xs font-mono font-medium text-zinc-400">
-                    <User className="w-3 h-3 text-zinc-500" /> Full Name
+                  <label className={`mb-1 flex items-center gap-1.5 text-xs font-mono font-bold ${
+                    isDark ? 'text-zinc-300' : 'text-slate-800'
+                  }`}>
+                    <User className="w-3.5 h-3.5 text-zinc-500" /> Full Name
                   </label>
                   <input
                     type="text"
                     autoComplete="name"
-                    placeholder="e.g. Rahul Sharma"
+                    placeholder="e.g. Dr. Aryan Sharma"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
-                    className={`w-full rounded-xl border px-3 py-2 text-sm transition-all focus:outline-none ${
+                    className={`w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:outline-none ${
                       isDark
-                        ? 'bg-zinc-900/90 border-zinc-800 text-white focus:border-[#CCFF00]'
-                        : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#0066FF]'
+                        ? 'bg-zinc-900/90 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                        : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                     }`}
                   />
                 </div>
@@ -460,28 +507,32 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
               {/* Email Address field */}
               <div>
-                <label className="mb-1 flex items-center gap-1.5 text-xs font-mono font-medium text-zinc-400">
-                  <Mail className="w-3 h-3 text-zinc-500" /> Email Address
+                <label className={`mb-1 flex items-center gap-1.5 text-xs font-mono font-bold ${
+                  isDark ? 'text-zinc-300' : 'text-slate-800'
+                }`}>
+                  <Mail className="w-3.5 h-3.5 text-zinc-500" /> Email Address
                 </label>
                 <input
                   type="email"
                   autoComplete="email"
-                  placeholder="aspirant@gmail.com"
+                  placeholder="mentor@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className={`w-full rounded-xl border px-3 py-2 text-sm transition-all focus:outline-none ${
+                  className={`w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:outline-none ${
                     isDark
-                      ? 'bg-zinc-900/90 border-zinc-800 text-white focus:border-[#CCFF00]'
-                      : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#0066FF]'
+                      ? 'bg-zinc-900/90 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                      : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                   }`}
                 />
               </div>
 
               {/* Password field */}
               <div>
-                <label className="mb-1 flex items-center gap-1.5 text-xs font-mono font-medium text-zinc-400">
-                  <Lock className="w-3 h-3 text-zinc-500" /> Password
+                <label className={`mb-1 flex items-center gap-1.5 text-xs font-mono font-bold ${
+                  isDark ? 'text-zinc-300' : 'text-slate-800'
+                }`}>
+                  <Lock className="w-3.5 h-3.5 text-zinc-500" /> Password
                 </label>
                 <input
                   type="password"
@@ -491,10 +542,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   onChange={(e) => setPassword(e.target.value)}
                   minLength={6}
                   required
-                  className={`w-full rounded-xl border px-3 py-2 text-sm transition-all focus:outline-none ${
+                  className={`w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:outline-none ${
                     isDark
-                      ? 'bg-zinc-900/90 border-zinc-800 text-white focus:border-[#CCFF00]'
-                      : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#0066FF]'
+                      ? 'bg-zinc-900/90 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                      : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                   }`}
                 />
               </div>
@@ -502,11 +553,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               {/* Mobile Number Option in Registration (with explicit note that OTP is not used) */}
               {authMode === 'signup' && (
                 <div className="pt-1">
-                  <label className="mb-1 flex items-center justify-between text-xs font-mono font-medium text-zinc-400">
-                    <span className="flex items-center gap-1.5">
-                      <Phone className="w-3 h-3 text-zinc-500" /> Mobile Number
+                  <label className="mb-1 flex items-center justify-between text-xs font-mono font-bold">
+                    <span className={`flex items-center gap-1.5 ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>
+                      <Phone className="w-3.5 h-3.5 text-zinc-500" /> Mobile Number
                     </span>
-                    <span className="text-[10px] text-zinc-500 font-sans">Optional / Contact only</span>
+                    <span className={`text-[10px] font-sans ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>Optional / Coordination</span>
                   </label>
                   <input
                     type="tel"
@@ -515,17 +566,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     placeholder="+91 98765 43210"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className={`w-full rounded-xl border px-3 py-2 text-sm transition-all focus:outline-none ${
+                    className={`w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:outline-none ${
                       isDark
-                        ? 'bg-zinc-900/90 border-zinc-800 text-white focus:border-[#CCFF00]'
-                        : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#0066FF]'
+                        ? 'bg-zinc-900/90 border-zinc-700 text-white placeholder-zinc-500 focus:border-[#CCFF00]'
+                        : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#0066FF]'
                     }`}
                   />
-                  {/* Explanatory note as requested: OTP is not used because no OTP API subscription */}
-                  <div className="mt-1.5 rounded-lg p-2 text-[11px] leading-tight flex items-start gap-1.5 bg-zinc-900/60 border border-zinc-800/80 text-zinc-400">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#CCFF00] shrink-0 mt-0.5" />
+                  {/* Explanatory note */}
+                  <div className={`mt-2 rounded-xl p-2.5 text-[11px] leading-tight flex items-start gap-2 border ${
+                    isDark
+                      ? 'bg-zinc-900/80 border-zinc-800 text-zinc-300'
+                      : 'bg-slate-100 border-slate-200 text-slate-700'
+                  }`}>
+                    <ShieldCheck className="w-4 h-4 text-[#CCFF00] shrink-0 mt-0.5" />
                     <span>
-                      <strong>No OTP required:</strong> Mobile number is collected for mentor coordination only. OTP verification is bypassed (no third-party OTP API subscription).
+                      <strong>No OTP required:</strong> Mobile number is collected for mentor coordination only. OTP verification is bypassed.
                     </span>
                   </div>
                 </div>
@@ -554,7 +609,26 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </button>
             </form>
 
-            {/* Feedback notification */}
+            {/* Subtle switch link */}
+            <div className="mt-3 text-center">
+              <button
+                type="button"
+                onClick={() => handleModeSwitch(authMode === 'login' ? 'signup' : 'login')}
+                className={`text-xs hover:underline cursor-pointer transition ${
+                  isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+                }`}
+              >
+                {authMode === 'login' ? (
+                  <span>
+                    New here? <span className={`font-semibold ${isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}`}>Register an account</span>
+                  </span>
+                ) : (
+                  <span>
+                    Already registered? <span className={`font-semibold ${isDark ? 'text-[#CCFF00]' : 'text-[#0066FF]'}`}>Log in</span>
+                  </span>
+                )}
+              </button>
+            </div>
             {authMessage && (
               <div
                 role="status"

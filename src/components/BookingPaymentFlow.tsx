@@ -25,6 +25,7 @@ import {
   Sparkle
 } from 'lucide-react';
 import { getCurrentAuthUser, type AuthUserData } from '../lib/supabase.ts';
+import { createSessionRequest } from '../utils/sessionRequestStorage.ts';
 
 export interface BookingPaymentFlowProps {
   theme: 'dark' | 'light';
@@ -49,62 +50,72 @@ export interface WireframeMentor {
 
 const WIREFRAME_MENTORS: WireframeMentor[] = [
   {
-    id: 'm1',
-    name: 'Aryan Sharma',
-    rank: 'AIR 48',
+    id: 'topper_ayush',
+    name: 'Ayush Bhalotia',
+    rank: 'AIR 04',
     score: '710/720',
     college: 'AIIMS New Delhi',
-    specialty: 'Physics Mechanics, Speed Drills & Rotational Equations',
+    specialty: 'Physics 180/180 Mastery, PYQ Pattern Decoding & Speed Drills',
     tier: 'Purple',
     bracket: 'AIR 1–100',
   },
   {
-    id: 'm2',
-    name: 'Sneha Patel',
-    rank: 'AIR 84',
-    score: '705/720',
-    college: 'AIIMS New Delhi',
-    specialty: 'NCERT Biology Active Extraction & Zero Negative Marks',
-    tier: 'Purple',
-    bracket: 'AIR 1–100',
-  },
-  {
-    id: 'm3',
-    name: 'Rohan Verma',
-    rank: 'AIR 184',
+    id: 'topper_vanisha',
+    name: 'Vanisha Satish',
+    rank: 'AIR 51',
     score: '695/720',
-    college: 'Maulana Azad Medical College (MAMC)',
-    specialty: 'Organic Chemistry Mechanisms & Error Matrix Architecture',
+    college: 'AIIMS New Delhi',
+    specialty: 'Organic Chemistry Roadmaps, Elimination Techniques & Mock Stamina',
+    tier: 'Purple',
+    bracket: 'AIR 1–100',
+  },
+  {
+    id: 'topper_soumya',
+    name: 'Soumya Bhadole',
+    rank: 'AIR 77',
+    score: '700/720',
+    college: 'AIIMS New Delhi',
+    specialty: 'NCERT Biology Active Extraction & Zero Negative Marks Strategy',
+    tier: 'Purple',
+    bracket: 'AIR 1–100',
+  },
+  {
+    id: 'topper_chaitra',
+    name: 'Chaithra',
+    rank: 'AIR 142',
+    score: '695/720',
+    college: 'Maulana Azad Medical College (MAMC), New Delhi',
+    specialty: 'Physical Chemistry Calculations & Marathon Time Management',
     tier: 'Diamond',
     bracket: 'AIR 100–5000',
   },
   {
-    id: 'm4',
-    name: 'Dr. Ananya Sen',
-    rank: 'AIR 340',
-    score: '685/720',
-    college: 'VMMC & Safdarjung Hospital, New Delhi',
-    specialty: 'Inorganic NCERT Mnemonics & Last 60-Day Revision Matrix',
+    id: 'topper_ayush_prasad',
+    name: 'Ayush Prasad',
+    rank: 'AIR 200',
+    score: '686/720',
+    college: 'University College of Medical Sciences (UCMS), Delhi',
+    specialty: 'High-Yield Physics Formulas, Negative Mark Elimination & PYQs',
     tier: 'Diamond',
     bracket: 'AIR 100–5000',
   },
   {
-    id: 'm5',
-    name: 'Tanmay Roy',
-    rank: 'AIR 892',
-    score: '675/720',
-    college: 'King George’s Medical University (KGMU)',
-    specialty: 'Physics Numerical Speed & Eliminating Exam Panic',
+    id: 'topper_pree_sharma',
+    name: 'Pree Sharma',
+    rank: 'AIR 1500',
+    score: '662/720',
+    college: "King George's Medical University (KGMU), Lucknow",
+    specialty: 'Biology Diagram Memorization, NCERT Keywords & 90-Day Sprint',
     tier: 'Diamond',
     bracket: 'AIR 100–5000',
   },
   {
-    id: 'm6',
-    name: 'Pooja Iyer',
-    rank: 'AIR 1420',
-    score: '665/720',
-    college: 'Bangalore Medical College (BMCRI)',
-    specialty: 'Dropper to Government GMC Transition Strategy',
+    id: 'topper_anushka',
+    name: 'Anushka',
+    rank: 'AIR 3000',
+    score: '648/720',
+    college: 'Bangalore Medical College and Research Institute (BMCRI)',
+    specialty: 'Mock Test Error Analysis, Converting Negatives into Strengths',
     tier: 'Diamond',
     bracket: 'AIR 100–5000',
   },
@@ -353,6 +364,24 @@ export const BookingPaymentFlow: React.FC<BookingPaymentFlowProps> = ({
         const stored = JSON.parse(localStorage.getItem('airneet_slot_bookings') || '[]');
         stored.unshift(record);
         localStorage.setItem('airneet_slot_bookings', JSON.stringify(stored));
+
+        // Sync into session request storage for mentor confirmation
+        createSessionRequest({
+          studentId: currentUser?.id || `aspirant_${cleanDigits}`,
+          studentName: userName.trim(),
+          studentEmail: currentUser?.email || `${userName.trim().toLowerCase().replace(/\s+/g, '')}@gmail.com`,
+          studentPhone: cleanDigits,
+          topperId: 'topper_active',
+          topperName: selectedMentor.name,
+          topperAir: selectedMentor.rank,
+          topperCollege: selectedMentor.college,
+          requestedDate: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
+          requestedSlotId: 'e1',
+          requestedSlotLabel: '06:00 PM – 07:00 PM',
+          neetAspirantYear: `NEET ${targetYear}`,
+          doubtTopic: diagnosedWeakness || 'Strategy consultation & negative marking elimination',
+          sessionFee: 1,
+        });
       } catch {
         // storage fallback
       }

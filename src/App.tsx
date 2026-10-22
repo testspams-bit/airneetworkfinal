@@ -21,6 +21,9 @@ import { MentorSpotlight } from './components/MentorSpotlight.tsx';
 import { BookingModal } from './components/BookingModal.tsx';
 import { BookingPaymentFlow } from './components/BookingPaymentFlow.tsx';
 import { TopperDashboard } from './components/TopperDashboard.tsx';
+import { TopperProfileOnboardingModal } from './components/TopperProfileOnboardingModal.tsx';
+import { StudentSessionsModal } from './components/StudentSessionsModal.tsx';
+import { loadTopperProfile } from './utils/topperStorage.ts';
 import {
   Sun,
   Moon,
@@ -29,6 +32,9 @@ import {
   Mail,
   User,
   LayoutDashboard,
+  GraduationCap,
+  Sparkles,
+  Calendar,
 } from 'lucide-react';
 
 export default function App() {
@@ -38,6 +44,8 @@ export default function App() {
   const [activeNav, setActiveNav] = useState<string>('home');
   const [isSocialOpen, setIsSocialOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isStudentSessionsOpen, setIsStudentSessionsOpen] = useState(false);
   const [isGetInTouchOpen, setIsGetInTouchOpen] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [bookingMentor, setBookingMentor] = useState<string | undefined>();
@@ -51,6 +59,7 @@ export default function App() {
     message?: string;
     mode?: 'login' | 'signup';
     role?: AccountRole;
+    forceStep?: 'role' | 'auth';
   } | null>(null);
 
   useEffect(() => {
@@ -236,6 +245,23 @@ export default function App() {
                     {currentUser.role === 'mentor' ? 'Mentor' : 'Student'}
                   </span>
                 </div>
+
+                {currentUser.role === 'student_mentee' && (
+                  <button
+                    type="button"
+                    onClick={() => setIsStudentSessionsOpen(true)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer active:scale-95 shadow-sm ${
+                      isDark
+                        ? 'border-emerald-500/50 bg-emerald-950/40 text-emerald-200 hover:bg-emerald-900/50 hover:border-emerald-400'
+                        : 'border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100'
+                    }`}
+                    title="View My Mentoring Sessions & Confirmed Slots"
+                  >
+                    <Calendar className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>My Sessions</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={handleLoginButton}
@@ -251,19 +277,43 @@ export default function App() {
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={handleLoginButton}
-                className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold font-mono uppercase tracking-wider transition-all duration-200 cursor-pointer active:scale-95 shadow-sm ${
-                  isDark
-                    ? 'bg-[#CCFF00] text-black hover:bg-[#d8ff33]'
-                    : 'bg-[#0066FF] text-white hover:bg-[#0052cc] shadow-[#0066FF]/20 shadow-md'
-                }`}
-                title="Log in to your account"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Log in</span>
-              </button>
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                {/* Sleek, compact Log In button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthModalState({ mode: 'login', forceStep: 'role' });
+                    setIsLoginOpen(true);
+                  }}
+                  className={`h-8 px-2.5 sm:px-3 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer flex items-center gap-1.5 select-none ${
+                    isDark
+                      ? 'text-zinc-300 hover:text-white hover:bg-zinc-800/80 active:bg-zinc-800'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200'
+                  }`}
+                  title="Log in as Student or AIR Mentor"
+                >
+                  <LogIn className="w-3.5 h-3.5 opacity-80" />
+                  <span>Log in</span>
+                </button>
+
+                {/* Sleek, compact Register action pill */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthModalState({ mode: 'signup', forceStep: 'role' });
+                    setIsLoginOpen(true);
+                  }}
+                  className={`h-8 px-3 sm:px-3.5 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer flex items-center gap-1.5 active:scale-95 shadow-sm border select-none ${
+                    isDark
+                      ? 'bg-[#CCFF00] hover:bg-[#d8ff33] text-black border-[#CCFF00]/50 shadow-[#CCFF00]/10'
+                      : 'bg-[#0066FF] hover:bg-[#0052cc] text-white border-[#0066FF]/50 shadow-[#0066FF]/15'
+                  }`}
+                  title="Create a new account as Student or AIR Mentor"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span>Register</span>
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -272,7 +322,10 @@ export default function App() {
       {activeNav === 'home' && (
         <NeetTimer
           theme={theme}
-          onJoinAsMentor={() => setIsLoginOpen(true)}
+          onJoinAsMentor={() => {
+            setAuthModalState({ mode: 'signup', role: 'mentor', forceStep: 'role' });
+            setIsLoginOpen(true);
+          }}
           onJoinCommunity={() => setIsSocialOpen(true)}
         />
       )}
@@ -282,7 +335,10 @@ export default function App() {
           <NeetTimer
             theme={theme}
             variant="compact"
-            onJoinAsMentor={() => setIsLoginOpen(true)}
+            onJoinAsMentor={() => {
+              setAuthModalState({ mode: 'signup', role: 'mentor', forceStep: 'role' });
+              setIsLoginOpen(true);
+            }}
           />
         </div>
       )}
@@ -399,7 +455,7 @@ export default function App() {
         initialMode={bookingInitialMode}
       />
 
-      {/* Student & Mentor Login Modal */}
+      {/* Student & Mentor Login / Registration Modal */}
       <LoginModal
         isOpen={isLoginOpen}
         onClose={() => {
@@ -407,10 +463,45 @@ export default function App() {
           setAuthModalState(null);
         }}
         onMentorSuccess={() => {
-          setActiveNav('dashboard');
+          setIsLoginOpen(false);
+          setIsOnboardingOpen(true);
+        }}
+        onOpenOnboarding={() => {
+          setIsLoginOpen(false);
+          setIsOnboardingOpen(true);
         }}
         theme={theme}
         initialState={authModalState}
+      />
+
+      {/* Detailed NEET Topper Profile & Slot Manager Onboarding Modal */}
+      <TopperProfileOnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+        onBackToSignUp={() => {
+          setIsOnboardingOpen(false);
+          setAuthModalState({ mode: 'signup', role: 'mentor' });
+          setIsLoginOpen(true);
+        }}
+        onComplete={(_profile) => {
+          setIsOnboardingOpen(false);
+          setActiveNav('dashboard');
+        }}
+        initialProfile={loadTopperProfile(
+          currentUser?.id || 'topper_active',
+          currentUser?.email || undefined,
+          currentUser?.fullName || undefined
+        )}
+        theme={theme}
+      />
+
+      {/* Aspirant Registered Account Confirmed Sessions Modal */}
+      <StudentSessionsModal
+        isOpen={isStudentSessionsOpen}
+        onClose={() => setIsStudentSessionsOpen(false)}
+        studentEmail={currentUser?.email}
+        studentName={currentUser?.fullName}
+        theme={theme}
       />
 
       {/* Instagram & YouTube Pop-up Modal */}
@@ -419,6 +510,80 @@ export default function App() {
         onClose={() => setIsSocialOpen(false)}
         theme={theme}
       />
+
+      {/* Floating Preview Toolbar for Reviewing Mentor Registration & Flow */}
+      <aside aria-label="Mentor registration preview controls" className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 max-w-[96vw] bg-black/92 border border-amber-500/50 text-white rounded-2xl px-3 py-2 shadow-2xl backdrop-blur-md flex items-center gap-1.5 sm:gap-2 text-xs font-mono overflow-x-auto">
+        <span className="hidden lg:inline-flex items-center gap-1.5 font-bold text-amber-300 mr-1 select-none shrink-0">
+          <GraduationCap className="w-4 h-4 text-amber-400" />
+          <span>Quick Preview:</span>
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            setIsOnboardingOpen(false);
+            setIsStudentSessionsOpen(false);
+            setAuthModalState({ mode: 'signup', role: 'mentor' });
+            setIsLoginOpen(true);
+          }}
+          className={`px-2.5 py-1.5 rounded-xl border font-bold transition cursor-pointer select-none shrink-0 ${
+            isLoginOpen && authModalState?.role === 'mentor' && authModalState?.mode === 'signup'
+              ? 'bg-[#CCFF00] text-black border-[#CCFF00] shadow-sm'
+              : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500'
+          }`}
+          title="Preview Step 1: Mentor Sign-up & Credentials"
+        >
+          1. Sign-Up
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setIsLoginOpen(false);
+            setIsStudentSessionsOpen(false);
+            setIsOnboardingOpen(true);
+          }}
+          className={`px-2.5 py-1.5 rounded-xl border font-bold transition cursor-pointer select-none shrink-0 ${
+            isOnboardingOpen
+              ? 'bg-purple-500 text-white border-purple-400 shadow-sm'
+              : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500'
+          }`}
+          title="Preview Step 2: 3-Page NEET Profile & Simplified Slot Manager"
+        >
+          2. NEET Onboarding
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setIsLoginOpen(false);
+            setIsOnboardingOpen(false);
+            setIsStudentSessionsOpen(false);
+            setActiveNav('dashboard');
+          }}
+          className={`px-2.5 py-1.5 rounded-xl border font-bold transition cursor-pointer select-none shrink-0 ${
+            activeNav === 'dashboard'
+              ? 'bg-blue-500 text-white border-blue-400 shadow-sm'
+              : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white hover:border-zinc-500'
+          }`}
+          title="Preview Topper Dashboard (Confirm Student Requests)"
+        >
+          3. Topper Portal
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setIsLoginOpen(false);
+            setIsOnboardingOpen(false);
+            setIsStudentSessionsOpen(true);
+          }}
+          className={`px-2.5 py-1.5 rounded-xl border font-bold transition cursor-pointer select-none shrink-0 ${
+            isStudentSessionsOpen
+              ? 'bg-emerald-500 text-black border-emerald-400 shadow-sm'
+              : 'bg-zinc-900 border-zinc-700 text-emerald-400 hover:text-white hover:border-emerald-500'
+          }`}
+          title="Preview Aspirant View (Check Confirmed Slot Status)"
+        >
+          4. Aspirant Confirmed Slots
+        </button>
+      </aside>
 
       {/* Fluid Animated Mouse Cursor Bubble */}
       <AnimatedCursor theme={theme} />
