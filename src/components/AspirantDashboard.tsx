@@ -36,6 +36,12 @@ import {
   Share2,
   Filter,
   Plus,
+  CheckSquare,
+  ShieldCheck,
+  Zap,
+  Star,
+  MessageSquare,
+  PhoneCall,
 } from 'lucide-react';
 import {
   type AspirantProfile,
@@ -70,13 +76,17 @@ interface AspirantDashboardProps {
   userEmail?: string;
   userName?: string;
   initialTab?: AspirantTab;
+  autoEditProfile?: boolean;
   onSignOut: () => void;
   onSwitchToHome: () => void;
   onBookMoreSessions?: () => void;
+  onOpenSyllabusTracker?: () => void;
+  onExploreMentors?: () => void;
 }
 
 export type AspirantTab =
   | 'assessment'
+  | 'mentorship'
   | 'profile'
   | 'payments'
   | 'recordings'
@@ -89,20 +99,23 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
   userEmail,
   userName,
   initialTab = 'assessment',
+  autoEditProfile = false,
   onSignOut,
   onSwitchToHome,
   onBookMoreSessions,
+  onOpenSyllabusTracker,
+  onExploreMentors,
 }) => {
   const isDark = theme === 'dark';
-  const [activeTab, setActiveTab] = useState<AspirantTab>(initialTab);
+  const [activeTab, setActiveTab] = useState<AspirantTab>(autoEditProfile ? 'profile' : initialTab);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Core Data States
+  // Core Data States - loaded per user ID/email
   const [profile, setProfile] = useState<AspirantProfile>(() =>
-    loadAspirantProfile(userEmail, userName)
+    loadAspirantProfile(userEmail, userName, userId)
   );
   const [assessment, setAssessment] = useState<AspirantAssessment>(() =>
-    loadAspirantAssessment()
+    loadAspirantAssessment(userEmail, userId)
   );
   const [payments] = useState<PaymentTransaction[]>(() =>
     loadAspirantPayments()
@@ -116,10 +129,27 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
     loadSolvedQuestions()
   );
 
-  // Profile Edit State
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  // Profile Edit State - automatically opens in edit mode on first registration
+  const [isEditingProfile, setIsEditingProfile] = useState<boolean>(
+    Boolean(autoEditProfile || (!profile.isProfileComplete && initialTab === 'profile'))
+  );
   const [editProfileForm, setEditProfileForm] = useState<AspirantProfile>(profile);
   const [profileSaveSuccess, setProfileSaveSuccess] = useState(false);
+
+  // When autoEditProfile becomes true, switch to profile tab in edit mode
+  useEffect(() => {
+    if (autoEditProfile) {
+      setActiveTab('profile');
+      setIsEditingProfile(true);
+    }
+  }, [autoEditProfile]);
+
+  // Keep editProfileForm in sync with profile and user credentials
+  useEffect(() => {
+    const loaded = loadAspirantProfile(userEmail, userName, userId);
+    setProfile(loaded);
+    setEditProfileForm(loaded);
+  }, [userEmail, userName, userId]);
 
   // New Mock Test Logging Modal State
   const [isLogMockOpen, setIsLogMockOpen] = useState(false);
@@ -191,11 +221,12 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    saveAspirantProfile(editProfileForm);
-    setProfile(editProfileForm);
+    const updated = { ...editProfileForm, isProfileComplete: true };
+    saveAspirantProfile(updated, userEmail, userId);
+    setProfile(updated);
     setIsEditingProfile(false);
     setProfileSaveSuccess(true);
-    setTimeout(() => setProfileSaveSuccess(false), 3000);
+    setTimeout(() => setProfileSaveSuccess(false), 3500);
   };
 
   const handleToggleChapter = (chapterId: string) => {
@@ -226,7 +257,7 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
       negativeMarks: mockNegative,
     };
 
-    const updatedAssessment = addMockTestToAssessment(newResult);
+    const updatedAssessment = addMockTestToAssessment(newResult, userEmail, userId);
     setAssessment(updatedAssessment);
     setIsLogMockOpen(false);
     setMockName('');
@@ -255,11 +286,12 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
 
   const navTabs = [
     { id: 'assessment' as AspirantTab, label: 'Assessment Results', icon: BarChart3 },
+    { id: 'mentorship' as AspirantTab, label: '1-on-1 AIR Mentorship', icon: Sparkles, badge: 'Popular' },
+    { id: 'plan' as AspirantTab, label: 'Plan Prepared', icon: FileText },
+    { id: 'daily_question' as AspirantTab, label: 'Daily Question (OQAD)', icon: Target },
     { id: 'profile' as AspirantTab, label: 'My Profile', icon: User },
     { id: 'payments' as AspirantTab, label: 'Payment Status', icon: CreditCard },
     { id: 'recordings' as AspirantTab, label: 'Recordings & Transcripts', icon: Video },
-    { id: 'plan' as AspirantTab, label: 'Plan Prepared', icon: FileText },
-    { id: 'daily_question' as AspirantTab, label: 'Daily Question (OQAD)', icon: Target },
   ];
 
   return (
@@ -287,7 +319,7 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
             <Logo theme={theme} size="sm" />
           </button>
 
-          <div className="hidden md:flex items-center gap-2 text-xs font-mono text-zinc-400">
+          <div className="hidden md:flex items-center gap-2 text-sm font-mono text-zinc-400">
             <span className="text-zinc-500">/</span>
             <span className="font-semibold text-emerald-400">Aspirant Portal</span>
             <span className="text-zinc-500">/</span>
@@ -298,15 +330,15 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
         </div>
 
         {/* Center: Quick Target Pill Indicator */}
-        <div className="hidden lg:flex items-center gap-3 text-xs font-mono">
+        <div className="hidden lg:flex items-center gap-3 text-sm font-mono">
           <div
-            className={`px-3 py-1 rounded-full border flex items-center gap-2 ${
+            className={`px-3.5 py-1.5 rounded-full border flex items-center gap-2 ${
               isDark
                 ? 'bg-zinc-900/80 border-zinc-700 text-zinc-300'
                 : 'bg-slate-100 border-slate-200 text-slate-700'
             }`}
           >
-            <GraduationCap className="w-3.5 h-3.5 text-emerald-400" />
+            <GraduationCap className="w-4.5 h-4.5 text-emerald-400" />
             <span>Target: {profile.dreamCollege}</span>
             <span className="text-zinc-400">·</span>
             <span className="tabular-nums font-bold text-emerald-400">
@@ -315,23 +347,35 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
           </div>
 
           <div
-            className={`px-3 py-1 rounded-full border flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-full border flex items-center gap-2 ${
               isDark
                 ? 'bg-amber-950/40 border-amber-800/60 text-amber-300'
                 : 'bg-amber-50 border-amber-200 text-amber-800'
             }`}
           >
-            <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+            <Flame className="w-4.5 h-4.5 text-amber-500 fill-amber-500" />
             <span className="tabular-nums font-bold">{streak} Day Streak</span>
           </div>
         </div>
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {onBookMoreSessions && (
+            <button
+              type="button"
+              onClick={onBookMoreSessions}
+              className="flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-sm font-mono font-bold uppercase tracking-wider bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-black hover:brightness-110 shadow-xs transition-all active:scale-95 cursor-pointer"
+            >
+              <Sparkles className="w-4.5 h-4.5 shrink-0" />
+              <span className="hidden sm:inline">Book AIR Mentor (₹499)</span>
+              <span className="sm:hidden">Book Mentor</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onSwitchToHome}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-sm font-semibold border transition-colors cursor-pointer ${
               isDark
                 ? 'border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:text-white hover:bg-zinc-800'
                 : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100'
@@ -343,7 +387,7 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
           <button
             type="button"
             onClick={onSignOut}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium border transition-colors cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-sm font-mono font-semibold border transition-colors cursor-pointer ${
               isDark
                 ? 'border-red-950/60 bg-red-950/20 text-red-300 hover:bg-red-950/40'
                 : 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
@@ -356,12 +400,12 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`md:hidden p-2 rounded-lg border cursor-pointer ${
+            className={`md:hidden p-2 rounded-xl border cursor-pointer ${
               isDark ? 'border-zinc-800 bg-zinc-900' : 'border-slate-200 bg-white'
             }`}
             aria-label="Toggle Navigation Menu"
           >
-            {mobileMenuOpen ? <X className="w-4 h-4" /> : <LayoutDashboard className="w-4 h-4" />}
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <LayoutDashboard className="w-5 h-5" />}
           </button>
         </div>
       </header>
@@ -401,22 +445,23 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Assigned AIR Mentor Badge */}
+              {/* Plan & Mentor Status Badge */}
               <div
                 className={`pt-2.5 border-t text-[11px] font-mono flex items-center justify-between ${
                   isDark ? 'border-zinc-800 text-zinc-400' : 'border-slate-200 text-slate-500'
                 }`}
               >
-                <span>Mentor:</span>
-                <span className="font-bold text-emerald-400">
-                  {profile.assignedMentorName} ({profile.assignedMentorAir})
+                <span>Plan Status:</span>
+                <span className="font-bold text-emerald-400 flex items-center gap-1">
+                  <CheckSquare className="w-3 h-3 text-emerald-400" />
+                  Free 65-Ch Tracker
                 </span>
               </div>
             </div>
 
             {/* Navigation Tabs */}
             <nav className="space-y-1.5" aria-label="Aspirant Dashboard Tabs">
-              <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 px-3 py-1">
+              <div className="text-xs font-mono uppercase tracking-wider text-zinc-500 font-semibold px-3 py-1">
                 Aspirant Modules
               </div>
               {navTabs.map((tab) => {
@@ -430,7 +475,7 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
                       setActiveTab(tab.id);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer text-left select-none ${
+                    className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer text-left select-none ${
                       isActive
                         ? isDark
                           ? 'bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-500/30 shadow-xs'
@@ -442,14 +487,20 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
                   >
                     <div className="flex items-center gap-3">
                       <Icon
-                        className={`w-4 h-4 shrink-0 ${
+                        className={`w-5 h-5 shrink-0 ${
                           isActive ? 'text-emerald-400' : 'text-zinc-400'
                         }`}
                       />
                       <span className="whitespace-nowrap">{tab.label}</span>
                     </div>
+                    {tab.id === 'mentorship' && (
+                      <span className="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 font-bold border border-emerald-500/30 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" />
+                        AIR 100
+                      </span>
+                    )}
                     {tab.id === 'daily_question' && (
-                      <span className="px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                      <span className="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
                         OQAD
                       </span>
                     )}
@@ -459,41 +510,133 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
             </nav>
           </div>
 
-          {/* Quick Help / Schedule Call CTA in Sidebar */}
-          <div className="pt-6 mt-6 border-t border-zinc-800/80">
+          {/* High-Converting AIR Mentorship Promotion in Sidebar */}
+          <div className="pt-5 mt-5 border-t border-zinc-800/80">
             <div
-              className={`p-3.5 rounded-2xl border text-xs ${
+              className={`p-4 rounded-2xl border text-xs relative overflow-hidden ${
                 isDark
-                  ? 'bg-gradient-to-b from-zinc-900/60 to-zinc-950/80 border-zinc-800'
-                  : 'bg-slate-100/70 border-slate-200'
+                  ? 'bg-gradient-to-b from-emerald-950/40 via-zinc-900/90 to-zinc-950 border-emerald-500/30'
+                  : 'bg-gradient-to-b from-emerald-50 via-white to-slate-50 border-emerald-200 shadow-xs'
               }`}
             >
-              <div className="flex items-center gap-2 font-semibold text-emerald-400 mb-1">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Next Mentoring Call</span>
+              <div className="flex items-center gap-2 font-bold text-emerald-400 mb-1.5">
+                <Sparkles className="w-4 h-4 text-emerald-400" />
+                <span>AIR &lt; 100 1-on-1 Mentorship</span>
               </div>
               <p className="text-[11px] text-zinc-400 mb-3 leading-relaxed">
-                Slot confirmed with {profile.assignedMentorName} for Saturday, 07:00 PM.
+                Don&apos;t just track chapters—let AIIMS Delhi &amp; MAMC toppers audit your errors and formulate your 680+ strategy.
               </p>
-              {onBookMoreSessions && (
+              <div className="space-y-2">
+                {onBookMoreSessions && (
+                  <button
+                    type="button"
+                    onClick={onBookMoreSessions}
+                    className="w-full py-2 px-3 rounded-xl text-xs font-bold font-mono uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-400 text-black hover:brightness-110 transition-all cursor-pointer shadow-xs active:scale-95"
+                  >
+                    Book Call (From ₹499)
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={onBookMoreSessions}
-                  className={`w-full py-2 px-3 rounded-xl text-xs font-bold font-mono uppercase tracking-wider transition-all cursor-pointer ${
+                  onClick={() => {
+                    setActiveTab('mentorship');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full py-1.5 px-3 rounded-xl text-[11px] font-mono font-medium border text-center transition-all cursor-pointer ${
                     isDark
-                      ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
-                      : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
+                      ? 'border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-white hover:bg-zinc-800'
+                      : 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  Book New Session
+                  Compare Mentorship Plans →
                 </button>
-              )}
+              </div>
             </div>
           </div>
         </aside>
 
         {/* Right Content Viewport */}
-        <main className="flex-1 p-4 sm:p-7 md:p-9 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-7 md:p-9 overflow-y-auto space-y-8">
+          {/* PERSISTENT SYLLABUS TRACKER & AIR MENTORSHIP BRIDGE BANNER */}
+          <div
+            className={`p-5 sm:p-6 rounded-3xl border relative overflow-hidden transition-all ${
+              isDark
+                ? 'bg-gradient-to-r from-blue-950/40 via-zinc-900/90 to-emerald-950/30 border-emerald-500/30 shadow-lg'
+                : 'bg-gradient-to-r from-blue-50 via-white to-emerald-50 border-emerald-200 shadow-sm'
+            }`}
+          >
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+              <div className="space-y-2.5 max-w-2xl">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    <CheckSquare className="w-3 h-3 text-emerald-400" />
+                    Free Syllabus Tracker Active (65 Chapters)
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                    <Sparkles className="w-2.5 h-2.5" /> AIR 1–100 Ranker Program
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white dark:text-zinc-100">
+                  Turn Your Chapter Tracking into a 680+ NEET Score
+                </h2>
+                <p className="text-xs sm:text-sm text-zinc-300 dark:text-zinc-300 leading-relaxed">
+                  Tracking chapters is step 1. But self-study alone leaves 35+ marks on the table in negative markings and false confidence. Get 1-on-1 mentorship from verified AIR &lt; 100 Rankers (AIIMS New Delhi &amp; MAMC) who audit your tracker, eliminate tricky NCERT traps, and hold you accountable.
+                </p>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-[11px] font-mono text-zinc-400">
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <CheckCircle2 className="w-3 h-3" /> AIIMS Delhi &amp; MAMC Mentors
+                  </span>
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <CheckCircle2 className="w-3 h-3" /> Negative Mark Liquidation (-30 Marks)
+                  </span>
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <CheckCircle2 className="w-3 h-3" /> 1-on-1 Google Meet Sessions
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0 min-w-[220px]">
+                {onBookMoreSessions && (
+                  <button
+                    type="button"
+                    onClick={onBookMoreSessions}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-black hover:brightness-110 shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Book 1-on-1 Call (₹499)</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('mentorship')}
+                  className={`w-full py-2.5 px-4 rounded-xl text-xs font-mono font-bold uppercase tracking-wider border transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    activeTab === 'mentorship'
+                      ? 'bg-blue-600 text-white border-blue-500'
+                      : isDark
+                      ? 'bg-zinc-900 border-zinc-700 text-zinc-200 hover:bg-zinc-800'
+                      : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-100'
+                  }`}
+                >
+                  <span>Explore Mentorship Plans</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+                {onOpenSyllabusTracker && (
+                  <button
+                    type="button"
+                    onClick={onOpenSyllabusTracker}
+                    className={`w-full py-2 px-4 rounded-xl text-[11px] font-mono text-zinc-400 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      isDark ? 'hover:bg-zinc-800/50' : 'hover:bg-slate-100'
+                    }`}
+                  >
+                    <CheckSquare className="w-3 h-3 text-emerald-400" />
+                    <span>Open 65-Chapter Tracker</span>
+                    <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* TAB 1: ASSESSMENT RESULTS */}
           {activeTab === 'assessment' && (
             <div className="space-y-8 animate-in fade-in duration-200">
@@ -593,6 +736,55 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
                   <div className="mt-2 text-xs text-zinc-400 font-mono">
                     Accuracy: <span className="text-emerald-400 font-bold tabular-nums">{assessment.accuracyRate}%</span>
                   </div>
+                </div>
+              </div>
+
+              {/* Mentorship Bridge Callout for Score Gap & Negative Marks */}
+              <div
+                className={`p-5 sm:p-6 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-5 ${
+                  isDark
+                    ? 'bg-gradient-to-r from-emerald-950/40 via-zinc-900 to-blue-950/30 border-emerald-500/40'
+                    : 'bg-gradient-to-r from-emerald-50 via-white to-blue-50 border-emerald-200 shadow-sm'
+                }`}
+              >
+                <div className="space-y-1.5 max-w-2xl">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5" /> AIR Diagnostic Insight
+                    </span>
+                    <span className="text-xs font-mono text-zinc-400">
+                      Score Gap to {profile.dreamCollege}: {Math.max(0, profile.targetScore - assessment.currentScore)} Marks
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold">
+                    Turn Your {assessment.currentScore}/720 Benchmark into {profile.targetScore}+ with an AIR &lt; 100 Ranker
+                  </h3>
+                  <p className="text-xs text-zinc-300 dark:text-zinc-400 leading-relaxed">
+                    You lost <strong className="text-red-400 font-mono">-{assessment.negativeMarksLost} marks</strong> to negative marking in recent tests. Our AIIMS New Delhi &amp; MAMC mentors audit your test error logs to eliminate those mistakes and construct a custom 60-day comeback plan.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row md:flex-col gap-2 shrink-0">
+                  {onBookMoreSessions && (
+                    <button
+                      type="button"
+                      onClick={onBookMoreSessions}
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold font-mono uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-400 text-black hover:brightness-110 transition shadow-sm active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Book Diagnostic Audit (₹499)</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('mentorship')}
+                    className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold border transition cursor-pointer text-center ${
+                      isDark
+                        ? 'border-zinc-700 bg-zinc-900/80 text-zinc-300 hover:text-white'
+                        : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    View All AIR Mentors →
+                  </button>
                 </div>
               </div>
 
@@ -797,6 +989,701 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
             </div>
           )}
 
+          {/* TAB: 1-ON-1 AIR MENTORSHIP PROGRAM */}
+          {activeTab === 'mentorship' && (
+            <div className="space-y-10 animate-in fade-in duration-200">
+              {/* Mentorship Header & Value Proposition */}
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-800/80">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Personalized 1-on-1 Guidance · AIR Top 100</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+                    Convert Your Syllabus into 680+ NEET Marks
+                  </h1>
+                  <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
+                    Self-study tracking lets you know what is left. Our AIR Top 100 mentors from AIIMS Delhi, MAMC, and VMMC guide you through how to master it under real exam pressure—cutting 25–40 negative marks and building weekly custom milestones.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 shrink-0">
+                  {onOpenSyllabusTracker && (
+                    <button
+                      type="button"
+                      onClick={onOpenSyllabusTracker}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-mono font-medium border flex items-center gap-1.5 transition-colors cursor-pointer ${
+                        isDark
+                          ? 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800'
+                          : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Back to Tracker</span>
+                    </button>
+                  )}
+                  {onBookMoreSessions && (
+                    <button
+                      type="button"
+                      onClick={onBookMoreSessions}
+                      className="px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-400 text-black hover:brightness-110 shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Book AIR Mentor Call</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* 4 Core Value Pillars */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div
+                  className={`p-5 rounded-2xl border space-y-2 ${
+                    isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-white border-slate-200 shadow-xs'
+                  }`}
+                >
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                    <GraduationCap className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold text-sm">AIIMS &amp; MAMC Toppers</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    100% verified All India Rankers currently enrolled in India&apos;s premier medical colleges.
+                  </p>
+                </div>
+
+                <div
+                  className={`p-5 rounded-2xl border space-y-2 ${
+                    isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-white border-slate-200 shadow-xs'
+                  }`}
+                >
+                  <div className="w-9 h-9 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                    <Target className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold text-sm">Negative Mark Audit</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Line-by-line review of your mock mistakes to eliminate 25–40 marks lost to silly errors and traps.
+                  </p>
+                </div>
+
+                <div
+                  className={`p-5 rounded-2xl border space-y-2 ${
+                    isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-white border-slate-200 shadow-xs'
+                  }`}
+                >
+                  <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold text-sm">Custom Weekly Timetable</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Tailored revision cycles matched directly with your 65-Chapter Syllabus Tracker progress.
+                  </p>
+                </div>
+
+                <div
+                  className={`p-5 rounded-2xl border space-y-2 ${
+                    isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-white border-slate-200 shadow-xs'
+                  }`}
+                >
+                  <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                    <Video className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-bold text-sm">1-on-1 Meet &amp; WhatsApp</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Direct private video consultations and WhatsApp doubt solving. No bots or recorded generic videos.
+                  </p>
+                </div>
+              </div>
+
+              {/* Mentorship Tiers & Pricing */}
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <div className="text-xs font-mono uppercase tracking-widest text-emerald-400 font-bold">
+                      Choose Your Program
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">
+                      Mentorship Tiers &amp; Booking
+                    </h2>
+                  </div>
+                  <span className="text-xs font-mono text-zinc-400">
+                    Flexible options · Verified AIR Toppers · 100% Satisfaction Guarantee
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Tier 1: Single Diagnostic Strategy Call */}
+                  <div
+                    className={`p-6 sm:p-7 rounded-3xl border flex flex-col justify-between transition-all ${
+                      isDark
+                        ? 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
+                        : 'bg-white border-slate-200 shadow-xs hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-mono uppercase font-bold text-zinc-400 tracking-wider">
+                          Entry / Baseline
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-300">
+                          Single Session
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-bold">1-on-1 Diagnostic Call</h3>
+                        <p className="text-xs text-zinc-400 mt-1">
+                          Audit your syllabus tracker, mock errors, and get an immediate 30-day action plan.
+                        </p>
+                      </div>
+
+                      <div className="flex items-baseline gap-1.5 pt-2">
+                        <span className="text-3xl font-black font-mono tabular-nums text-white dark:text-zinc-100">
+                          ₹499
+                        </span>
+                        <span className="text-xs text-zinc-400 line-through">₹1,499</span>
+                        <span className="text-[10px] font-mono text-emerald-400 ml-1">67% OFF</span>
+                      </div>
+
+                      <ul className="space-y-2.5 text-xs text-zinc-300 pt-3 border-t border-zinc-800/80">
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                          <span>45-Minute 1-on-1 Video Strategy Call</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                          <span>Syllabus Tracker retention audit (Block A/B/C)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                          <span>Mock paper error log &amp; negative mark analysis</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                          <span>Personalized 30-day catch-up timetable</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                          <span>Call recording &amp; action checklist uploaded to portal</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="pt-6 mt-6 border-t border-zinc-800/80">
+                      {onBookMoreSessions && (
+                        <button
+                          type="button"
+                          onClick={onBookMoreSessions}
+                          className={`w-full py-2.5 px-4 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer border ${
+                            isDark
+                              ? 'border-zinc-700 bg-zinc-800 text-white hover:bg-zinc-700'
+                              : 'border-slate-300 bg-slate-900 text-white hover:bg-slate-800'
+                          }`}
+                        >
+                          Book Strategy Call (₹499)
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tier 2: 30-Day Intensive (Highlighted) */}
+                  <div
+                    className={`p-6 sm:p-7 rounded-3xl border relative flex flex-col justify-between transition-all ${
+                      isDark
+                        ? 'bg-gradient-to-b from-emerald-950/40 via-zinc-900/90 to-zinc-950 border-emerald-500/50 shadow-xl'
+                        : 'bg-gradient-to-b from-emerald-50 via-white to-slate-50 border-emerald-300 shadow-md'
+                    }`}
+                  >
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-widest bg-emerald-500 text-black shadow-sm flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5" /> Most Popular
+                    </div>
+
+                    <div className="space-y-4 pt-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-mono uppercase font-bold text-emerald-400 tracking-wider">
+                          High-Yield Mentorship
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                          4 Calls + WhatsApp
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-bold">30-Day Score Acceleration</h3>
+                        <p className="text-xs text-zinc-300 dark:text-zinc-400 mt-1">
+                          Dedicated AIR Topper mentor guiding your daily revision, mock tests, and doubts.
+                        </p>
+                      </div>
+
+                      <div className="flex items-baseline gap-1.5 pt-2">
+                        <span className="text-3xl font-black font-mono tabular-nums text-emerald-400">
+                          ₹2,999
+                        </span>
+                        <span className="text-xs text-zinc-400 line-through">₹5,999</span>
+                        <span className="text-[10px] font-mono text-emerald-400 ml-1">50% OFF</span>
+                      </div>
+
+                      <ul className="space-y-2.5 text-xs text-zinc-200 dark:text-zinc-300 pt-3 border-t border-zinc-800/80">
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                          <span><strong>4 Weekly 1-on-1 Google Meet calls</strong> (45–60 min each)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                          <span><strong>Direct WhatsApp Doubt Solving</strong> with your AIR Mentor</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                          <span>Weekly Syllabus Tracker check-in &amp; target adjustment</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                          <span>Comprehensive error log inspection before major tests</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                          <span>High-yield Physics &amp; Chemistry NCERT formula cheat sheets</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="pt-6 mt-6 border-t border-zinc-800/80">
+                      {onBookMoreSessions && (
+                        <button
+                          type="button"
+                          onClick={onBookMoreSessions}
+                          className="w-full py-2.5 px-4 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-black hover:brightness-110 shadow-md transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Enroll in 30-Day Plan (₹2,999)</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tier 3: AIR 100 Comprehensive Season */}
+                  <div
+                    className={`p-6 sm:p-7 rounded-3xl border flex flex-col justify-between transition-all ${
+                      isDark
+                        ? 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
+                        : 'bg-white border-slate-200 shadow-xs hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-mono uppercase font-bold text-purple-400 tracking-wider">
+                          Full Season Package
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          Until NEET Day
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-bold">AIR 100 Comprehensive</h3>
+                        <p className="text-xs text-zinc-400 mt-1">
+                          End-to-end ranker mentorship with AIIMS New Delhi topper until you sit for the exam.
+                        </p>
+                      </div>
+
+                      <div className="flex items-baseline gap-1.5 pt-2">
+                        <span className="text-3xl font-black font-mono tabular-nums text-white dark:text-zinc-100">
+                          ₹6,999
+                        </span>
+                        <span className="text-xs text-zinc-400 line-through">₹14,999</span>
+                        <span className="text-[10px] font-mono text-purple-400 ml-1">53% OFF</span>
+                      </div>
+
+                      <ul className="space-y-2.5 text-xs text-zinc-300 pt-3 border-t border-zinc-800/80">
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
+                          <span><strong>12 One-on-One deep dive video sessions</strong></span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
+                          <span>Dedicated AIIMS New Delhi / MAMC mentor pairing</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
+                          <span>Unlimited 24/7 priority WhatsApp doubt solving</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
+                          <span>Exam hall strategy: time boxing, stamina &amp; panic control</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
+                          <span>Bi-weekly parent-mentor alignment &amp; score trajectory review</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="pt-6 mt-6 border-t border-zinc-800/80">
+                      {onBookMoreSessions && (
+                        <button
+                          type="button"
+                          onClick={onBookMoreSessions}
+                          className={`w-full py-2.5 px-4 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer border ${
+                            isDark
+                              ? 'border-purple-500/50 bg-purple-950/40 text-purple-200 hover:bg-purple-900/50'
+                              : 'border-purple-300 bg-purple-50 text-purple-900 hover:bg-purple-100'
+                          }`}
+                        >
+                          Enroll Full Season (₹6,999)
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Verified Mentors Spotlight */}
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <div className="text-xs font-mono uppercase tracking-widest text-emerald-400 font-bold">
+                      Verified Ranker Faculty
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">
+                      Mentors Available For You
+                    </h2>
+                  </div>
+                  <span className="text-xs font-mono text-zinc-400">
+                    Active medical students · 100% Verified scorecards
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Mentor 1 */}
+                  <div
+                    className={`p-5 rounded-2xl border flex flex-col justify-between transition-all ${
+                      isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-white border-slate-200 shadow-xs'
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                          AIR 04
+                        </span>
+                        <span className="text-xs font-mono font-bold text-emerald-400">710 / 720</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl overflow-hidden border border-purple-500/40 bg-zinc-800 shrink-0">
+                          <img
+                            src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80"
+                            alt="Ayush Bhalotia"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-sm text-white dark:text-zinc-100 truncate">
+                            Ayush Bhalotia
+                          </h4>
+                          <div className="text-[11px] text-zinc-400 truncate flex items-center gap-1">
+                            <School className="w-3 h-3 text-emerald-400 shrink-0" />
+                            <span>AIIMS New Delhi</span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-zinc-300 dark:text-zinc-400 leading-relaxed bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-800/80">
+                        <strong className="text-emerald-400">Specialty:</strong> Physics 180/180 Master, PYQ Pattern Decoding &amp; Numerical Speed Drills.
+                      </p>
+                    </div>
+
+                    <div className="pt-4 mt-4 border-t border-zinc-800/80">
+                      {onBookMoreSessions && (
+                        <button
+                          type="button"
+                          onClick={onBookMoreSessions}
+                          className="w-full py-2 px-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-emerald-500 text-black hover:bg-emerald-400 transition cursor-pointer"
+                        >
+                          Book 1-on-1 Call
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Mentor 2 */}
+                  <div
+                    className={`p-5 rounded-2xl border flex flex-col justify-between transition-all ${
+                      isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-white border-slate-200 shadow-xs'
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                          AIR 77
+                        </span>
+                        <span className="text-xs font-mono font-bold text-emerald-400">700 / 720</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl overflow-hidden border border-purple-500/40 bg-zinc-800 shrink-0">
+                          <img
+                            src="https://images.unsplash.com/photo-1594824813571-638f02614d3f?w=150&auto=format&fit=crop&q=80"
+                            alt="Soumya Bhadole"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-sm text-white dark:text-zinc-100 truncate">
+                            Soumya Bhadole
+                          </h4>
+                          <div className="text-[11px] text-zinc-400 truncate flex items-center gap-1">
+                            <School className="w-3 h-3 text-emerald-400 shrink-0" />
+                            <span>AIIMS New Delhi</span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-zinc-300 dark:text-zinc-400 leading-relaxed bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-800/80">
+                        <strong className="text-emerald-400">Specialty:</strong> NCERT Biology Active Recall, Assertion-Reason Traps &amp; Zero Negative Marks.
+                      </p>
+                    </div>
+
+                    <div className="pt-4 mt-4 border-t border-zinc-800/80">
+                      {onBookMoreSessions && (
+                        <button
+                          type="button"
+                          onClick={onBookMoreSessions}
+                          className="w-full py-2 px-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-emerald-500 text-black hover:bg-emerald-400 transition cursor-pointer"
+                        >
+                          Book 1-on-1 Call
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Mentor 3 */}
+                  <div
+                    className={`p-5 rounded-2xl border flex flex-col justify-between transition-all ${
+                      isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-white border-slate-200 shadow-xs'
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-blue-500/15 text-blue-300 border border-blue-500/30">
+                          AIR 142
+                        </span>
+                        <span className="text-xs font-mono font-bold text-emerald-400">695 / 720</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl overflow-hidden border border-blue-500/40 bg-zinc-800 shrink-0">
+                          <img
+                            src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&auto=format&fit=crop&q=80"
+                            alt="Chaithra"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-sm text-white dark:text-zinc-100 truncate">
+                            Chaithra
+                          </h4>
+                          <div className="text-[11px] text-zinc-400 truncate flex items-center gap-1">
+                            <School className="w-3 h-3 text-emerald-400 shrink-0" />
+                            <span>MAMC New Delhi</span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-zinc-300 dark:text-zinc-400 leading-relaxed bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-800/80">
+                        <strong className="text-emerald-400">Specialty:</strong> Physical &amp; Organic Chemistry Mechanisms, Speed Calculation &amp; Stamina.
+                      </p>
+                    </div>
+
+                    <div className="pt-4 mt-4 border-t border-zinc-800/80">
+                      {onBookMoreSessions && (
+                        <button
+                          type="button"
+                          onClick={onBookMoreSessions}
+                          className="w-full py-2 px-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-emerald-500 text-black hover:bg-emerald-400 transition cursor-pointer"
+                        >
+                          Book 1-on-1 Call
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Mentor 4 */}
+                  <div
+                    className={`p-5 rounded-2xl border flex flex-col justify-between transition-all ${
+                      isDark ? 'bg-zinc-900/60 border-zinc-800' : 'bg-white border-slate-200 shadow-xs'
+                    }`}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-blue-500/15 text-blue-300 border border-blue-500/30">
+                          AIR 200
+                        </span>
+                        <span className="text-xs font-mono font-bold text-emerald-400">686 / 720</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl overflow-hidden border border-blue-500/40 bg-zinc-800 shrink-0">
+                          <img
+                            src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=150&auto=format&fit=crop&q=80"
+                            alt="Ayush Prasad"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-sm text-white dark:text-zinc-100 truncate">
+                            Ayush Prasad
+                          </h4>
+                          <div className="text-[11px] text-zinc-400 truncate flex items-center gap-1">
+                            <School className="w-3 h-3 text-emerald-400 shrink-0" />
+                            <span>UCMS Delhi</span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-zinc-300 dark:text-zinc-400 leading-relaxed bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-800/80">
+                        <strong className="text-emerald-400">Specialty:</strong> High-Yield Formulas, Negative Mark Elimination &amp; Mock Exam Allocation.
+                      </p>
+                    </div>
+
+                    <div className="pt-4 mt-4 border-t border-zinc-800/80">
+                      {onBookMoreSessions && (
+                        <button
+                          type="button"
+                          onClick={onBookMoreSessions}
+                          className="w-full py-2 px-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-emerald-500 text-black hover:bg-emerald-400 transition cursor-pointer"
+                        >
+                          Book 1-on-1 Call
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Comparison Matrix: Free Tracker Alone vs AIR Mentorship Guided */}
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <div className="text-xs font-mono uppercase tracking-widest text-emerald-400 font-bold">
+                      The Ranker Difference
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">
+                      Free Syllabus Tracker vs. AIR 1-on-1 Mentorship
+                    </h2>
+                  </div>
+                </div>
+
+                <div
+                  className={`rounded-2xl border overflow-x-auto ${
+                    isDark ? 'bg-zinc-900/40 border-zinc-800' : 'bg-white border-slate-200 shadow-xs'
+                  }`}
+                >
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr
+                        className={`border-b text-zinc-400 font-mono uppercase text-[10px] tracking-wider ${
+                          isDark ? 'border-zinc-800 bg-zinc-900/80' : 'border-slate-200 bg-slate-50'
+                        }`}
+                      >
+                        <th className="py-3.5 px-4">Feature / Dimension</th>
+                        <th className="py-3.5 px-4 text-center">Free Syllabus Tracker (Current)</th>
+                        <th className="py-3.5 px-4 text-center text-emerald-400 font-bold">
+                          AIR &lt; 100 1-on-1 Mentorship
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800/60">
+                      <tr className={isDark ? 'hover:bg-zinc-800/20' : 'hover:bg-slate-50'}>
+                        <td className="py-3 px-4 font-semibold text-zinc-200">
+                          65-Chapter NEET UG Checklists
+                        </td>
+                        <td className="py-3 px-4 text-center text-zinc-400">
+                          Included (Self-recorded checkmarks)
+                        </td>
+                        <td className="py-3 px-4 text-center text-emerald-400 font-semibold">
+                          Topper verifies depth &amp; tests active recall
+                        </td>
+                      </tr>
+                      <tr className={isDark ? 'hover:bg-zinc-800/20' : 'hover:bg-slate-50'}>
+                        <td className="py-3 px-4 font-semibold text-zinc-200">
+                          High-Yield Block Prioritization
+                        </td>
+                        <td className="py-3 px-4 text-center text-zinc-400">
+                          Static Block A/B/C breakdown
+                        </td>
+                        <td className="py-3 px-4 text-center text-emerald-400 font-semibold">
+                          Customized to your exact scoring weaknesses
+                        </td>
+                      </tr>
+                      <tr className={isDark ? 'hover:bg-zinc-800/20' : 'hover:bg-slate-50'}>
+                        <td className="py-3 px-4 font-semibold text-zinc-200">
+                          Mock Test Error Log Analysis
+                        </td>
+                        <td className="py-3 px-4 text-center text-zinc-400">
+                          Self-log scores only
+                        </td>
+                        <td className="py-3 px-4 text-center text-emerald-400 font-semibold">
+                          Topper isolates why you picked incorrect options
+                        </td>
+                      </tr>
+                      <tr className={isDark ? 'hover:bg-zinc-800/20' : 'hover:bg-slate-50'}>
+                        <td className="py-3 px-4 font-semibold text-zinc-200">
+                          Negative Marking Eradication (-30 Marks)
+                        </td>
+                        <td className="py-3 px-4 text-center text-red-400">
+                          Trial and error (35+ marks leaked)
+                        </td>
+                        <td className="py-3 px-4 text-center text-emerald-400 font-semibold">
+                          Elimination rules &amp; question-skipping criteria
+                        </td>
+                      </tr>
+                      <tr className={isDark ? 'hover:bg-zinc-800/20' : 'hover:bg-slate-50'}>
+                        <td className="py-3 px-4 font-semibold text-zinc-200">
+                          1-on-1 Live Video Consultations
+                        </td>
+                        <td className="py-3 px-4 text-center text-zinc-500">—</td>
+                        <td className="py-3 px-4 text-center text-emerald-400 font-semibold">
+                          Weekly Google Meet calls with AIIMS rankers
+                        </td>
+                      </tr>
+                      <tr className={isDark ? 'hover:bg-zinc-800/20' : 'hover:bg-slate-50'}>
+                        <td className="py-3 px-4 font-semibold text-zinc-200">
+                          Direct WhatsApp Mentor Access
+                        </td>
+                        <td className="py-3 px-4 text-center text-zinc-500">—</td>
+                        <td className="py-3 px-4 text-center text-emerald-400 font-semibold">
+                          Direct priority doubt chat with your mentor
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Bottom Quick-Start Callout */}
+              <div
+                className={`p-6 sm:p-8 rounded-3xl border text-center space-y-4 ${
+                  isDark
+                    ? 'bg-gradient-to-r from-emerald-950/40 via-zinc-900 to-teal-950/40 border-emerald-500/40'
+                    : 'bg-gradient-to-r from-emerald-50 via-white to-teal-50 border-emerald-200'
+                }`}
+              >
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <div className="space-y-1.5 max-w-xl mx-auto">
+                  <h3 className="text-xl sm:text-2xl font-black">
+                    Start with a 1-on-1 Strategy Call Today
+                  </h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Test out the mentorship with a single 45-minute diagnostic session for just ₹499. If you don&apos;t get immediate clarity on your negative marks and revision roadmap, 100% money-back guarantee.
+                  </p>
+                </div>
+                {onBookMoreSessions && (
+                  <button
+                    type="button"
+                    onClick={onBookMoreSessions}
+                    className="inline-flex items-center gap-2 px-8 py-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-400 text-black hover:brightness-110 shadow-lg active:scale-95 transition cursor-pointer"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>Book Strategy Call (₹499)</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* TAB 2: ASPIRANT PROFILE ("this profile") */}
           {activeTab === 'profile' && (
             <div className="space-y-8 animate-in fade-in duration-200">
@@ -843,6 +1730,19 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
                 <div className="p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2 font-mono">
                   <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
                   <span>Profile updated successfully! Persistent across your sessions.</span>
+                </div>
+              )}
+
+              {/* First-time registration or incomplete profile guidance banner */}
+              {(!profile.isProfileComplete || autoEditProfile) && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-950/70 via-teal-950/50 to-blue-950/60 border border-emerald-500/40 text-emerald-200 text-xs space-y-2 mb-6 shadow-md backdrop-blur-sm">
+                  <div className="flex items-center gap-2 font-bold font-mono text-sm text-emerald-300">
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                    <span>Welcome to your personalized Aspirant Dashboard!</span>
+                  </div>
+                  <p className="text-zinc-300 leading-relaxed font-sans">
+                    Please fill in your preparation details below (Target NEET Year, Category, Current Mock Benchmark, Target Score, Dream Medical College, and Coaching). Your assigned AIR ranker mentors will use this diagnostic information to personalize your 1-on-1 strategy sessions and custom timetable.
+                  </p>
                 </div>
               )}
 
@@ -1251,6 +2151,68 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
                 </div>
               </div>
 
+              {/* Mentorship Upgrade & Additional Sessions Grid */}
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <h2 className="text-lg font-bold tracking-tight">Available Mentorship Tiers</h2>
+                  <span className="text-xs font-mono text-zinc-400">1-click direct booking via UPI or Card</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className={`p-5 rounded-2xl border flex flex-col justify-between ${isDark ? 'bg-zinc-900/40 border-zinc-800' : 'bg-white border-slate-200'}`}>
+                    <div>
+                      <span className="text-[10px] font-mono font-bold uppercase text-zinc-400">Diagnostic</span>
+                      <h3 className="font-bold text-sm mt-1">Single Strategy Call</h3>
+                      <div className="text-xl font-bold font-mono text-white dark:text-zinc-100 my-2">₹499</div>
+                      <p className="text-xs text-zinc-400">45-min deep dive mock &amp; tracker audit.</p>
+                    </div>
+                    {onBookMoreSessions && (
+                      <button
+                        type="button"
+                        onClick={onBookMoreSessions}
+                        className="mt-4 w-full py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-emerald-500 text-black hover:bg-emerald-400 transition cursor-pointer"
+                      >
+                        Book Now
+                      </button>
+                    )}
+                  </div>
+                  <div className={`p-5 rounded-2xl border flex flex-col justify-between relative ${isDark ? 'bg-emerald-950/20 border-emerald-500/40' : 'bg-emerald-50/50 border-emerald-200'}`}>
+                    <span className="absolute -top-2.5 right-4 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase bg-emerald-500 text-black">Popular</span>
+                    <div>
+                      <span className="text-[10px] font-mono font-bold uppercase text-emerald-400">Intensive</span>
+                      <h3 className="font-bold text-sm mt-1">30-Day Mentorship</h3>
+                      <div className="text-xl font-bold font-mono text-emerald-400 my-2">₹2,999</div>
+                      <p className="text-xs text-zinc-400">4 weekly 1-on-1 calls + WhatsApp doubt support.</p>
+                    </div>
+                    {onBookMoreSessions && (
+                      <button
+                        type="button"
+                        onClick={onBookMoreSessions}
+                        className="mt-4 w-full py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-emerald-500 text-black hover:bg-emerald-400 transition cursor-pointer"
+                      >
+                        Enroll Now
+                      </button>
+                    )}
+                  </div>
+                  <div className={`p-5 rounded-2xl border flex flex-col justify-between ${isDark ? 'bg-zinc-900/40 border-zinc-800' : 'bg-white border-slate-200'}`}>
+                    <div>
+                      <span className="text-[10px] font-mono font-bold uppercase text-purple-400">Comprehensive</span>
+                      <h3 className="font-bold text-sm mt-1">Full Season AIR 100</h3>
+                      <div className="text-xl font-bold font-mono text-white dark:text-zinc-100 my-2">₹6,999</div>
+                      <p className="text-xs text-zinc-400">12 1-on-1 calls + 24/7 priority support until NEET.</p>
+                    </div>
+                    {onBookMoreSessions && (
+                      <button
+                        type="button"
+                        onClick={onBookMoreSessions}
+                        className="mt-4 w-full py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-purple-600 text-white hover:bg-purple-500 transition cursor-pointer"
+                      >
+                        Enroll Now
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Transactions History */}
               <div className="space-y-4">
                 <h2 className="text-lg font-bold tracking-tight">Transaction History & Receipts</h2>
@@ -1621,6 +2583,73 @@ export const AspirantDashboard: React.FC<AspirantDashboardProps> = ({
                 <div className="text-xs font-mono text-zinc-400">
                   Prepared by: <span className="font-bold text-white">{studyPlan.preparedBy}</span> ({studyPlan.mentorAir})
                 </div>
+              </div>
+
+              {/* Marks MathonGo Syllabus Tracker Integration Banner */}
+              <div
+                className={`p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                  isDark
+                    ? 'bg-gradient-to-r from-blue-950/40 via-zinc-900 to-emerald-950/20 border-blue-500/30'
+                    : 'bg-gradient-to-r from-blue-50 via-white to-emerald-50 border-blue-200'
+                }`}
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                      100% Free Tool
+                    </span>
+                    <span className="text-xs font-mono text-zinc-400">Inspired by Marks MathonGo</span>
+                  </div>
+                  <h3 className="text-sm sm:text-base font-bold font-sans">
+                    Complete 65-Chapter NEET UG Syllabus Tracker & Analytics
+                  </h3>
+                  <p className="text-xs text-zinc-400">
+                    Track chapter weightage (Block A/B/C), NCERT line-by-line ticks, 2019–2024 PYQ count, and Rev 1 & 2 cycles.
+                  </p>
+                </div>
+
+                {onOpenSyllabusTracker && (
+                  <button
+                    type="button"
+                    onClick={onOpenSyllabusTracker}
+                    className="shrink-0 px-4 py-2.5 rounded-xl text-xs font-bold font-mono uppercase bg-[#3B82F6] hover:bg-blue-600 text-white transition cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+                  >
+                    <span>Open Tracker</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Mentorship Upgrade Callout for Personalized Study Plan */}
+              <div
+                className={`p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                  isDark
+                    ? 'bg-gradient-to-r from-purple-950/30 via-zinc-900 to-emerald-950/30 border-purple-500/30'
+                    : 'bg-gradient-to-r from-purple-50 via-white to-emerald-50 border-purple-200'
+                }`}
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-purple-400">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Personalized Revision Timetable Service</span>
+                  </div>
+                  <h4 className="font-bold text-sm">
+                    Want an AIIMS Delhi Topper to customize this timetable to your actual Syllabus Tracker completion?
+                  </h4>
+                  <p className="text-xs text-zinc-400">
+                    Our mentors align your coaching schedule, mock test dates, and weak chapters into a customized 7-day schedule with daily accountability.
+                  </p>
+                </div>
+                {onBookMoreSessions && (
+                  <button
+                    type="button"
+                    onClick={onBookMoreSessions}
+                    className="shrink-0 px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-400 text-black hover:brightness-110 transition cursor-pointer shadow-xs active:scale-95 flex items-center justify-center gap-1.5"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    <span>Get Custom AIR Plan (₹499)</span>
+                  </button>
+                )}
               </div>
 
               {/* Progress Summary Banner */}

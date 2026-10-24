@@ -330,6 +330,16 @@
   align-items: center;
   padding: 36px 0 92px;
   min-height: 660px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+.home-intro,
+.home-intro *:not(strong) {
+  font-style: normal;
+}
+
+.home-intro * {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
 .home-intro__copy {
@@ -351,11 +361,11 @@
 .home-rate-card__caption,
 .home-rate-card__bottom {
   font-family: "Space Mono", monospace !important;
-  font-family: "Space Mono", monospace;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
+  font-style: normal;
 }
 
 .home-eyebrow {
@@ -376,10 +386,11 @@
   display: flex;
   flex-direction: column;
   margin: 25px 0 18px;
-  font-family: "Space Grotesk", sans-serif !important;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: clamp(46px, 6.6vw, 84px);
   font-weight: 700;
-  letter-spacing: -0.075em;
+  font-style: normal;
+  letter-spacing: -0.04em;
   line-height: 0.94;
 }
 
@@ -391,8 +402,11 @@
   display: flex;
   margin: 20px 0 11px;
   color: var(--home-text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: clamp(36px, 4.6vw, 55px);
-  letter-spacing: -0.07em;
+  font-weight: 800;
+  font-style: normal;
+  letter-spacing: -0.03em;
   line-height: .95;
   text-transform: uppercase;
 }
@@ -411,8 +425,11 @@
   border-radius: 0 6px 6px 0;
   background: color-mix(in srgb, var(--home-accent) 7%, transparent);
   color: var(--home-text);
-  font: 700 10px "Space Mono", monospace;
-  letter-spacing: .11em;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 11px;
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: .06em;
   line-height: 1.3;
   text-transform: uppercase;
   text-shadow: 0 0 15px color-mix(in srgb, var(--home-accent) 27%, transparent);
@@ -422,7 +439,9 @@
   max-width: 580px;
   margin: 0 0 19px;
   color: var(--home-muted);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: 15px;
+  font-style: normal;
   line-height: 1.65;
 }
 
@@ -582,7 +601,10 @@
   display: flex;
   align-items: center;
   color: var(--home-accent);
-  font: italic 700 25px "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 24px;
+  font-weight: 700;
+  font-style: normal;
   letter-spacing: .01em;
   text-transform: uppercase;
 }
@@ -598,18 +620,26 @@
   gap: 10px;
   margin: 21px 0 8px;
   color: var(--home-text);
-  font: italic 700 clamp(42px, 5.4vw, 58px) "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: clamp(38px, 5.2vw, 54px);
+  font-weight: 700;
+  font-style: normal;
   letter-spacing: -.025em;
   white-space: nowrap;
 }
 
 .home-intro__aspirants strong {
   color: var(--home-accent);
+  font-style: italic;
+  font-weight: 800;
 }
 
 .home-intro__aspirants .home-intro__unit {
   color: var(--home-text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: .82em;
+  font-weight: 600;
+  font-style: normal;
   letter-spacing: -.015em;
 }
 
@@ -654,12 +684,18 @@
 
 .home-intro__stats--editorial .home-intro__stat-value > span {
   color: var(--home-text);
-  font: italic 700 clamp(16px, 2vw, 22px) "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: clamp(15px, 1.8vw, 20px);
+  font-weight: 600;
+  font-style: normal;
 }
 
 .home-intro__stats--editorial .home-intro__stat strong {
   color: var(--home-accent);
-  font: italic 800 clamp(22px, 2.7vw, 30px) "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: clamp(22px, 2.7vw, 30px);
+  font-weight: 800;
+  font-style: italic;
   letter-spacing: -.015em;
   line-height: 1;
   text-transform: none;
@@ -670,7 +706,7 @@
 }
 
 .home-intro__stats--editorial .home-intro__stat:nth-child(1) .home-intro__stat-value > span {
-  font-size: clamp(20px, 2.2vw, 24px);
+  font-size: clamp(18px, 2vw, 22px);
 }
 
 .home-intro__stats--editorial .home-intro__stat:nth-child(2) .home-intro__stat-value > strong {
@@ -678,7 +714,7 @@
 }
 
 .home-intro__stats--editorial .home-intro__stat:nth-child(2) .home-intro__stat-value > span {
-  font-size: clamp(18px, 2vw, 22px);
+  font-size: clamp(16px, 1.8vw, 20px);
 }
 
 .home-intro__stats--editorial .home-intro__stat:nth-child(3) .home-intro__stat-value > strong {
@@ -686,13 +722,14 @@
 }
 
 .home-intro__stats--editorial .home-intro__stat:nth-child(3) .home-intro__stat-value > span {
-  font-size: clamp(15px, 1.8vw, 19px);
+  font-size: clamp(14px, 1.6vw, 18px);
 }
 
 .home-intro__stats--editorial .home-intro__stat-copy > span {
   color: var(--home-muted);
-  font-size: 10px;
-  font-style: italic;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 11px;
+  font-style: normal;
 }
 
 .home-intro__stats--editorial .home-intro__ratio {
@@ -706,7 +743,10 @@
   background: transparent;
   box-shadow: none;
   color: var(--home-accent);
-  font: italic 800 clamp(15px, 2vw, 20px) "Barlow Condensed", "Arial Narrow", sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: clamp(15px, 2vw, 20px);
+  font-weight: 800;
+  font-style: italic;
   letter-spacing: -.01em;
   text-shadow: 0 0 9px color-mix(in srgb, var(--home-accent) 68%, transparent), 0 0 22px color-mix(in srgb, var(--home-accent) 30%, transparent);
   white-space: nowrap;
@@ -714,7 +754,10 @@
 
 .home-intro__stats--editorial .home-intro__ratio span {
   color: var(--home-muted);
-  font: italic 600 8px "Space Mono", monospace;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 9px;
+  font-weight: 600;
+  font-style: normal;
   letter-spacing: .03em;
   text-transform: uppercase;
 }
@@ -724,12 +767,12 @@
 }
 
 .home-intro__title--tagline {
-  margin: 24px 0 6px;
+  margin: 0 0 6px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: clamp(38px, 4.8vw, 54px);
-  font-style: italic;
-  font-family: "Barlow Condensed", "Arial Narrow", sans-serif !important;
   font-weight: 800;
-  letter-spacing: -.015em;
+  font-style: normal;
+  letter-spacing: -.03em;
   text-transform: uppercase;
 }
 
@@ -747,8 +790,11 @@
   border: 0;
   background: transparent;
   color: var(--home-text);
-  font: italic 700 9px "Space Mono", monospace;
-  letter-spacing: .035em;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 11px;
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: .04em;
   text-shadow: 0 0 10px color-mix(in srgb, var(--home-accent) 55%, transparent);
 }
 
@@ -758,8 +804,10 @@
 
 .home-intro__actions .home-intro__action {
   border-radius: 8px;
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 11px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 12px;
+  font-weight: 600;
+  font-style: normal;
   letter-spacing: .015em;
   text-transform: none;
 }
@@ -767,7 +815,9 @@
 .home-intro__disclaimer {
   margin: 13px 0 7px;
   color: var(--home-muted);
-  font-size: 9px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 10px;
+  font-style: normal;
   line-height: 1.45;
 }
 
@@ -777,15 +827,19 @@
   align-items: center;
   gap: 10px;
   color: var(--home-text);
-  font: italic 700 15px "Space Grotesk", sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 14px;
+  font-weight: 600;
+  font-style: normal;
 }
 
 .home-intro__actions .home-intro__action--assessment {
-  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .07em;
-  text-transform: uppercase;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 12px;
+  font-weight: 600;
+  font-style: normal;
+  letter-spacing: .02em;
+  text-transform: none;
 }
 
 .home-intro__links a {
@@ -794,6 +848,7 @@
   gap: 4px;
   color: inherit;
   text-decoration: none;
+  font-style: normal;
 }
 
 .home-intro__links a:hover {

@@ -101,14 +101,10 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
         <div
           role="region"
           aria-label="NEET UG countdown"
-          className={`inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-mono font-bold shadow-xs backdrop-blur-md ${
-            isDark
-              ? 'border-red-500/30 bg-red-950/70 text-white'
-              : 'border-red-300 bg-white/90 text-red-950'
-          }`}
+          className="inline-flex items-center gap-1.5 px-0 py-1 text-xs font-mono font-bold bg-transparent border-0"
         >
           <Flame className="h-3.5 w-3.5 shrink-0 fill-current text-red-500" />
-          <span className={isDark ? 'text-red-200' : 'text-red-900'}>
+          <span className={isDark ? 'text-red-300' : 'text-red-700'}>
             NEET &apos;{String(time.targetYear).slice(-2)}
           </span>
           <span className="opacity-40">·</span>
@@ -120,10 +116,10 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
         <button
           type="button"
           onClick={onJoinAsMentor || onTopperPortal || onWorkAsMentor}
-          className={`group inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 font-mono text-xs font-bold transition-all duration-200 active:scale-95 ${
+          className={`group inline-flex items-center gap-1.5 px-1 py-1 font-mono text-xs font-bold transition-colors cursor-pointer bg-transparent border-0 ${
             isDark
-              ? 'border-amber-400/40 bg-amber-400/10 text-amber-300 hover:border-amber-400 hover:bg-amber-400/15'
-              : 'border-amber-300 bg-amber-50 text-amber-950 hover:border-amber-400 hover:bg-amber-100'
+              ? 'text-amber-300 hover:text-amber-200'
+              : 'text-amber-800 hover:text-amber-950'
           }`}
           title="Join us as mentor — Register or log in to the mentor portal"
           aria-label="Join us as mentor"
@@ -137,21 +133,17 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
 
   return (
     <div className="w-full max-w-[1560px] mx-auto px-4 sm:px-8 md:px-10 pt-2 pb-1.5 flex items-center justify-between gap-2.5 sm:gap-4 select-none">
-      {/* Extreme Left: Desktop Timer Box */}
+      {/* Extreme Left: Desktop Timer Box (No border, no background color) */}
       <div
         role="region"
         aria-label="NEET UG Countdown Urgency Timer"
-        className={`hidden sm:inline-flex items-center gap-3 rounded-2xl border backdrop-blur-md px-3.5 py-1.5 text-xs transition-all shadow-xs shrink-0 ${
-          isDark
-            ? 'bg-red-950/25 border-red-500/30 text-white'
-            : 'bg-red-100/50 border-red-300 text-red-950'
-        }`}
+        className="hidden sm:inline-flex items-center gap-2.5 px-0 py-1 text-xs transition-all shrink-0 bg-transparent border-0"
       >
-        {/* NEET UG Title with Flame icon (No dot) */}
-        <div className="flex items-center gap-2">
+        {/* NEET UG Title with Flame icon */}
+        <div className="flex items-center gap-1.5">
           <span
             className={`flex items-center gap-1.5 font-mono font-bold uppercase tracking-wider text-[11px] ${
-              isDark ? 'text-red-200' : 'text-red-900'
+              isDark ? 'text-red-400' : 'text-red-700'
             }`}
           >
             <Flame className="w-3.5 h-3.5 fill-current text-red-500 shrink-0" />
@@ -162,13 +154,11 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
         {/* Days : Hours : Minutes Countdown Format */}
         <div className="flex items-center">
           <div
-            className={`flex items-center gap-1.5 font-mono font-bold tracking-tight text-xs sm:text-sm px-2 py-0.5 rounded-xl border ${
-              isDark
-                ? 'bg-black/30 border-white/10 text-white'
-                : 'bg-white/80 border-red-200 text-slate-900 shadow-xs'
+            className={`flex items-center gap-1.5 font-mono font-bold tracking-tight text-xs sm:text-sm px-0 py-0.5 bg-transparent border-0 ${
+              isDark ? 'text-white' : 'text-slate-900'
             }`}
           >
-            <div className="flex items-baseline gap-1">
+            <div className="flex items-baseline gap-0.5">
               <span
                 className={`text-sm sm:text-base font-black ${
                   isDark ? 'text-amber-300' : 'text-red-700'
@@ -183,7 +173,7 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
 
             <span className="opacity-50">:</span>
 
-            <div className="flex items-baseline gap-1">
+            <div className="flex items-baseline gap-0.5">
               <span className="text-sm sm:text-base font-black">
                 {format2Digits(time.hours)}
               </span>
@@ -194,7 +184,7 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
 
             <span className="opacity-50">:</span>
 
-            <div className="flex items-baseline gap-1">
+            <div className="flex items-baseline gap-0.5">
               <span className="text-sm sm:text-base font-black">
                 {format2Digits(time.minutes)}
               </span>
@@ -206,21 +196,17 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
         </div>
       </div>
 
-      {/* Extreme Left: Mobile Timer Box */}
+      {/* Extreme Left: Mobile Timer Box (No border, no background color) */}
       <div
         role="region"
         aria-label="NEET UG Countdown Urgency Timer"
-        className={`flex sm:hidden items-center gap-1.5 rounded-xl border backdrop-blur-md px-2.5 py-1 text-xs transition-all shadow-xs min-w-0 shrink ${
-          isDark
-            ? 'bg-red-950/25 border-red-500/30 text-white'
-            : 'bg-red-100/50 border-red-300 text-red-950'
-        }`}
+        className="flex sm:hidden items-center gap-1.5 px-0 py-1 text-xs transition-all min-w-0 shrink bg-transparent border-0"
       >
         <div className="flex items-center gap-1 min-w-0">
           <Flame className="w-3.5 h-3.5 fill-current text-red-500 shrink-0" />
           <span
             className={`font-mono font-bold uppercase tracking-wider text-[10px] truncate ${
-              isDark ? 'text-red-200' : 'text-red-900'
+              isDark ? 'text-red-400' : 'text-red-700'
             }`}
           >
             NEET &apos;{String(time.targetYear).slice(-2)}
@@ -228,10 +214,8 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
         </div>
 
         <div
-          className={`flex items-center gap-1 font-mono font-bold text-[11px] px-2 py-0.5 rounded-lg border shrink-0 ${
-            isDark
-              ? 'bg-black/30 border-white/10 text-white'
-              : 'bg-white/80 border-red-200 text-slate-900'
+          className={`flex items-center gap-1 font-mono font-bold text-[11px] px-0 py-0.5 shrink-0 bg-transparent border-0 ${
+            isDark ? 'text-white' : 'text-slate-900'
           }`}
         >
           <span className={isDark ? 'text-amber-300 font-black' : 'text-red-700 font-black'}>
@@ -244,15 +228,15 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
         </div>
       </div>
 
-      {/* Community, pledge and mentor actions sit to the right of the countdown. */}
-      <div className="flex items-center justify-end gap-1.5 sm:gap-2 min-w-0">
+      {/* Community, pledge and mentor actions (No border, no background color) */}
+      <div className="flex items-center justify-end gap-1 sm:gap-2.5 min-w-0">
         <button
           type="button"
           onClick={onJoinCommunity}
-          className={`inline-flex items-center gap-1.5 rounded-xl border px-2.5 sm:px-3 py-1.5 font-mono text-[10px] sm:text-xs font-bold transition-all duration-200 active:scale-95 ${
+          className={`inline-flex items-center gap-1.5 px-2 py-1 font-mono text-[10px] sm:text-xs font-bold transition-colors cursor-pointer bg-transparent border-0 ${
             isDark
-              ? 'border-white/15 bg-white/[0.04] text-zinc-200 hover:border-amber-300/60 hover:text-amber-200 hover:shadow-[0_0_14px_rgba(251,191,36,0.15)]'
-              : 'border-slate-300 bg-white/80 text-slate-700 hover:border-blue-300 hover:text-blue-700'
+              ? 'text-zinc-400 hover:text-white'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
           aria-label="Join the AIR NEETwork community"
         >
@@ -262,10 +246,10 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
         <button
           type="button"
           onClick={() => setIsPledgeOpen(true)}
-          className={`inline-flex items-center gap-1.5 rounded-xl border px-2.5 sm:px-3 py-1.5 font-mono text-[10px] sm:text-xs font-bold transition-all duration-200 active:scale-95 ${
+          className={`inline-flex items-center gap-1.5 px-2 py-1 font-mono text-[10px] sm:text-xs font-bold transition-colors cursor-pointer bg-transparent border-0 ${
             isDark
-              ? 'border-[#3B82F6]/45 bg-[#3B82F6]/10 text-[#60A5FA] hover:border-[#3B82F6] hover:bg-[#3B82F6]/15 hover:shadow-[0_0_16px_rgba(59,130,246,0.25)]'
-              : 'border-blue-300 bg-blue-50 text-blue-800 hover:border-blue-400 hover:bg-blue-100'
+              ? 'text-[#60A5FA] hover:text-[#93c5fd]'
+              : 'text-[#0066FF] hover:text-[#0052cc]'
           }`}
           aria-label="Take the NEET pledge"
         >
@@ -275,29 +259,29 @@ export const NeetTimer: React.FC<NeetTimerProps> = ({
         <button
           type="button"
           onClick={onJoinAsMentor || onTopperPortal || onWorkAsMentor}
-          className={`group inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-2xl border font-mono text-xs font-bold transition-all duration-200 cursor-pointer active:scale-95 shadow-xs ${
+          className={`group inline-flex items-center gap-1.5 sm:gap-2 px-2 py-1 font-mono text-xs font-bold transition-colors cursor-pointer bg-transparent border-0 ${
             isDark
-              ? 'bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent border-amber-400/40 text-amber-300 hover:border-amber-400 hover:bg-amber-400/15 hover:shadow-[0_0_16px_rgba(251,191,36,0.25)]'
-              : 'bg-gradient-to-r from-amber-50 to-amber-100/60 border-amber-300 text-amber-950 hover:bg-amber-100 hover:border-amber-400 shadow-xs'
+              ? 'text-amber-300 hover:text-amber-200'
+              : 'text-amber-800 hover:text-amber-950'
           }`}
           title="Join us as mentor — Register or log in to the mentor portal"
           aria-label="Join us as mentor"
         >
           {/* Circular Mentor Emblem */}
           <span
-            className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110 ${
+            className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110 ${
               isDark
-                ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40'
-                : 'bg-amber-200/70 text-amber-900 border border-amber-300'
+                ? 'bg-amber-400/20 text-amber-300'
+                : 'bg-amber-200/80 text-amber-900'
             }`}
           >
-            <GraduationCap className="w-3.5 h-3.5" />
+            <GraduationCap className="w-3 h-3" />
           </span>
 
           {/* Label: "Join us as mentor" */}
           <span className="tracking-wide font-black whitespace-nowrap">
-            <span className="hidden xs:inline">Join us as mentor</span>
-            <span className="inline xs:hidden">Join as mentor</span>
+            <span className="hidden xs:inline">Join as mentor</span>
+            <span className="inline xs:hidden">Join</span>
           </span>
         </button>
       </div>

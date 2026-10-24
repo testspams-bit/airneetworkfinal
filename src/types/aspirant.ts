@@ -57,6 +57,7 @@ export interface AspirantProfile {
   assignedMentorCollege: string;
   streakDays: number;
   updatedAt: string;
+  isProfileComplete?: boolean;
 }
 
 export interface PaymentTransaction {

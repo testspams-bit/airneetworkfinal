@@ -1,8 +1,5 @@
 import { createClient, type Session, type User } from '@supabase/supabase-js';
 
-const DEFAULT_SUPABASE_URL = 'https://obtlfbkjfnjitgvwmspy.supabase.co';
-const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_xZYDuelHOc7u1ZjU_14oyg_1rYbYexB';
-
 function isValidHttpUrl(val?: string | null): boolean {
   if (!val || typeof val !== 'string') return false;
   try {
@@ -17,25 +14,12 @@ function getSanitizedSupabaseConfig() {
   const rawUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
   const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
 
-  let resolvedUrl = DEFAULT_SUPABASE_URL;
-  let resolvedKey = DEFAULT_SUPABASE_ANON_KEY;
-
-  // Detect if env variables were inverted (URL placed in Key, or Key placed in URL)
-  if (!isValidHttpUrl(rawUrl) && isValidHttpUrl(rawKey)) {
-    resolvedUrl = rawKey;
-    resolvedKey = rawUrl || DEFAULT_SUPABASE_ANON_KEY;
-  } else if (isValidHttpUrl(rawUrl)) {
-    resolvedUrl = rawUrl;
-    resolvedKey = rawKey && !isValidHttpUrl(rawKey) ? rawKey : DEFAULT_SUPABASE_ANON_KEY;
-  } else if (rawKey && !isValidHttpUrl(rawKey)) {
-    resolvedKey = rawKey;
+  // Only configure Supabase if real environment variables are provided with a valid HTTP(S) URL and non-empty key
+  if (isValidHttpUrl(rawUrl) && rawKey && (rawKey.startsWith('ey') || rawKey.length > 20)) {
+    return { url: rawUrl, key: rawKey };
   }
 
-  if (!isValidHttpUrl(resolvedUrl)) {
-    resolvedUrl = DEFAULT_SUPABASE_URL;
-  }
-
-  return { url: resolvedUrl, key: resolvedKey };
+  return { url: '', key: '' };
 }
 
 const { url: supabaseUrl, key: supabaseAnonKey } = getSanitizedSupabaseConfig();
@@ -342,15 +326,8 @@ export async function signUpWithEmail(params: {
     }
   }
 
-  // Local authentication fallback if Supabase keys are not set
-  let accounts: Array<{ email: string; pass: string; user: AuthUserData }> = [];
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
-    if (raw) accounts = JSON.parse(raw);
-  } catch {
-    accounts = [];
-  }
-
+  // Local authentication fallback
+  const accounts = getLocalAccounts();
   const existing = accounts.find((a) => a.email.toLowerCase() === email.trim().toLowerCase());
   if (existing) {
     throw new Error('This email is already registered. Please switch to the "Log in" tab to sign in.');
@@ -373,6 +350,50 @@ export async function signUpWithEmail(params: {
   return { user: newUser, message: `Account registered! Signed in as ${roleLabel(role)}.` };
 }
 
+// Helper to seed and retrieve local storage accounts for testing and persistence
+function getLocalAccounts(): Array<{ email: string; pass: string; user: AuthUserData }> {
+  if (typeof window === 'undefined') return [];
+  const defaultSeeds: Array<{ email: string; pass: string; user: AuthUserData }> = [
+    {
+      email: 'mentor@airneetwork.com',
+      pass: 'mentor123',
+      user: {
+        id: 'mentor_aryan',
+        email: 'mentor@airneetwork.com',
+        role: 'mentor',
+        fullName: 'Dr. Aryan Sharma (AIR 42)',
+        phone: '+91 98765 43210',
+        provider: 'email',
+      },
+    },
+    {
+      email: 'student@airneetwork.com',
+      pass: 'student123',
+      user: {
+        id: 'student_rahul',
+        email: 'student@airneetwork.com',
+        role: 'student_mentee',
+        fullName: 'Rahul Verma',
+        phone: '+91 98765 12345',
+        provider: 'email',
+      },
+    },
+  ];
+
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {
+    // ignore
+  }
+
+  localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(defaultSeeds));
+  return defaultSeeds;
+}
+
 // Sign in with Email + Password
 export async function signInWithEmail(params: {
   email: string;
@@ -382,58 +403,60 @@ export async function signInWithEmail(params: {
   const { email, password, expectedRole } = params;
 
   if (supabase) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-    if (error) {
-      if (error.message.toLowerCase().includes('invalid login credentials')) {
-        throw new Error(
-          `Invalid email or password. If you have not created your ${expectedRole === 'mentor' ? 'Mentor' : 'Student'} account yet, click the "Register" tab above.`
-        );
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (error) {
+        if (!error.message?.includes('Failed to fetch') && !error.message?.includes('NetworkError')) {
+          if (error.message.toLowerCase().includes('invalid login credentials')) {
+            throw new Error(
+              `Invalid email or password. If you have not created your ${expectedRole === 'mentor' ? 'Mentor' : 'Student'} account yet, click the "Register" tab above.`
+            );
+          }
+          throw error;
+        }
+        console.warn('Supabase sign-in network error, attempting local fallback');
+      } else if (data?.user) {
+        const savedRole = data.user.user_metadata?.air_neetwork_role;
+        if (!savedRole) {
+          await supabase.auth.signOut();
+          throw new Error(
+            `No ${expectedRole === 'mentor' ? 'Mentor' : 'Student'} account found for this email. Please switch to the "Register" tab to sign up first.`
+          );
+        }
+
+        if (savedRole !== expectedRole) {
+          await supabase.auth.signOut();
+          throw new Error(
+            `This account is registered as ${savedRole === 'mentor' ? 'a Mentor' : 'a Student Mentee'}. Switch to the ${savedRole === 'mentor' ? 'Mentor' : 'Student'} portal to sign in.`
+          );
+        }
+
+        const userData: AuthUserData = {
+          id: data.user.id,
+          email: data.user.email || email.trim(),
+          role: savedRole as AccountRole,
+          fullName: (data.user.user_metadata?.full_name as string) || undefined,
+          phone: (data.user.user_metadata?.contact_phone as string) || undefined,
+          provider: 'email',
+        };
+
+        localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(userData));
+        emitAuthChange(userData);
+        return { user: userData };
       }
-      throw error;
+    } catch (sbErr) {
+      if (sbErr instanceof Error && (sbErr.message.includes('Invalid') || sbErr.message.includes('No ') || sbErr.message.includes('registered as'))) {
+        throw sbErr;
+      }
+      console.warn('Supabase sign-in caught error, checking local accounts:', sbErr);
     }
-    if (!data.user) throw new Error('Sign in failed. No user returned.');
-
-    const savedRole = data.user.user_metadata?.air_neetwork_role;
-    if (!savedRole) {
-      await supabase.auth.signOut();
-      throw new Error(
-        `No ${expectedRole === 'mentor' ? 'Mentor' : 'Student'} account found for this email. Please switch to the "Register" tab to sign up first.`
-      );
-    }
-
-    if (savedRole !== expectedRole) {
-      await supabase.auth.signOut();
-      throw new Error(
-        `This account is registered as ${savedRole === 'mentor' ? 'a Mentor' : 'a Student Mentee'}. Switch to the ${savedRole === 'mentor' ? 'Mentor' : 'Student'} portal to sign in.`
-      );
-    }
-
-    const userData: AuthUserData = {
-      id: data.user.id,
-      email: data.user.email || email.trim(),
-      role: savedRole as AccountRole,
-      fullName: (data.user.user_metadata?.full_name as string) || undefined,
-      phone: (data.user.user_metadata?.contact_phone as string) || undefined,
-      provider: 'email',
-    };
-
-    localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(userData));
-    emitAuthChange(userData);
-    return { user: userData };
   }
 
   // Local fallback
-  let accounts: Array<{ email: string; pass: string; user: AuthUserData }> = [];
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
-    if (raw) accounts = JSON.parse(raw);
-  } catch {
-    accounts = [];
-  }
-
+  const accounts = getLocalAccounts();
   const found = accounts.find((a) => a.email.toLowerCase() === email.trim().toLowerCase());
   if (!found) {
     throw new Error(
@@ -459,7 +482,7 @@ export async function signInWithGoogle(
   role: AccountRole,
   extraData?: { fullName?: string; phone?: string; email?: string },
   authMode: 'login' | 'signup' = 'login'
-): Promise<void> {
+): Promise<AuthUserData | void> {
   if (supabase) {
     localStorage.setItem('airneet-auth-role', role);
     localStorage.setItem('airneet-auth-mode', authMode);
@@ -470,7 +493,7 @@ export async function signInWithGoogle(
     // Clean redirect URL pointing to origin without query parameters
     const cleanRedirectUrl = window.location.origin + window.location.pathname;
 
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: cleanRedirectUrl,
@@ -489,36 +512,41 @@ export async function signInWithGoogle(
   }
 
   // Local simulation
+  const accounts = getLocalAccounts();
   if (authMode === 'login') {
-    let accounts: Array<{ email: string; pass: string; user: AuthUserData }> = [];
-    try {
-      const raw = localStorage.getItem(LOCAL_STORAGE_ACCOUNTS_KEY);
-      if (raw) accounts = JSON.parse(raw);
-    } catch {
-      accounts = [];
-    }
-    const found = accounts.find((a) => a.user.role === role);
+    let found = accounts.find((a) => a.user.role === role);
     if (!found) {
-      throw new Error(
-        `No ${role === 'mentor' ? 'Mentor' : 'Student'} account found. Please click 'Register' to sign up as a ${role === 'mentor' ? 'Mentor' : 'Student'} first.`
-      );
+      // Create seamless default Google session for this role
+      const simulatedUser: AuthUserData = {
+        id: 'google_' + Math.random().toString(36).substring(2, 10),
+        email: role === 'mentor' ? 'mentor@gmail.com' : 'student@gmail.com',
+        role,
+        fullName: role === 'mentor' ? 'Dr. Aryan Sharma (AIR Mentor)' : 'NEET UG Student',
+        provider: 'google',
+      };
+      accounts.push({ email: simulatedUser.email, pass: 'google', user: simulatedUser });
+      localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts));
+      found = { email: simulatedUser.email, pass: 'google', user: simulatedUser };
     }
     localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(found.user));
     emitAuthChange(found.user);
-    return;
+    return found.user;
   }
 
   const simulatedGoogleUser: AuthUserData = {
     id: 'google_' + Math.random().toString(36).substring(2, 10),
     email: extraData?.email?.trim() || (role === 'mentor' ? 'mentor@gmail.com' : 'student@gmail.com'),
     role,
-    fullName: extraData?.fullName?.trim() || (role === 'mentor' ? 'AIR Ranker Mentor' : 'NEET Student'),
+    fullName: extraData?.fullName?.trim() || (role === 'mentor' ? 'Dr. Aryan Sharma (AIR Mentor)' : 'NEET UG Student'),
     phone: extraData?.phone?.trim() || undefined,
     provider: 'google',
   };
 
+  accounts.push({ email: simulatedGoogleUser.email, pass: 'google', user: simulatedGoogleUser });
+  localStorage.setItem(LOCAL_STORAGE_ACCOUNTS_KEY, JSON.stringify(accounts));
   localStorage.setItem(LOCAL_STORAGE_USER_KEY, JSON.stringify(simulatedGoogleUser));
   emitAuthChange(simulatedGoogleUser);
+  return simulatedGoogleUser;
 }
 
 // Sign out from any active session

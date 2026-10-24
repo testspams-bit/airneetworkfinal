@@ -27,6 +27,10 @@ import {
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onMentorRegister?: () => void;
+  onMentorLogin?: () => void;
+  onStudentRegister?: () => void;
+  onStudentLogin?: () => void;
   onMentorSuccess?: () => void;
   onStudentSuccess?: () => void;
   onOpenOnboarding?: () => void;
@@ -42,6 +46,10 @@ interface LoginModalProps {
 export const LoginModal: React.FC<LoginModalProps> = ({
   isOpen,
   onClose,
+  onMentorRegister,
+  onMentorLogin,
+  onStudentRegister,
+  onStudentLogin,
   onMentorSuccess,
   onStudentSuccess,
   onOpenOnboarding,
@@ -170,28 +178,36 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           role,
         });
         setAuthMessage({
-          text: result.message || 'Account created successfully! Signing you in...',
+          text: result.message || 'Account created successfully! Opening your dashboard...',
           type: 'success',
         });
-        if (role === 'mentor' && onMentorSuccess) {
-          onMentorSuccess();
-        } else if (role === 'student_mentee' && onStudentSuccess) {
-          onStudentSuccess();
-        }
-        window.setTimeout(onClose, 1000);
+        window.setTimeout(() => {
+          onClose();
+          if (role === 'mentor') {
+            if (onMentorRegister) onMentorRegister();
+            else if (onMentorSuccess) onMentorSuccess();
+          } else {
+            if (onStudentRegister) onStudentRegister();
+            else if (onStudentSuccess) onStudentSuccess();
+          }
+        }, 400);
       } else {
         await signInWithEmail({
           email: email.trim(),
           password,
           expectedRole: role,
         });
-        setAuthMessage({ text: 'Signed in successfully! Welcome back.', type: 'success' });
-        if (role === 'mentor' && onMentorSuccess) {
-          onMentorSuccess();
-        } else if (role === 'student_mentee' && onStudentSuccess) {
-          onStudentSuccess();
-        }
-        window.setTimeout(onClose, 800);
+        setAuthMessage({ text: 'Signed in successfully! Opening your dashboard...', type: 'success' });
+        window.setTimeout(() => {
+          onClose();
+          if (role === 'mentor') {
+            if (onMentorLogin) onMentorLogin();
+            else if (onMentorSuccess) onMentorSuccess();
+          } else {
+            if (onStudentLogin) onStudentLogin();
+            else if (onStudentSuccess) onStudentSuccess();
+          }
+        }, 400);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Authentication failed. Please check your details.';
@@ -205,7 +221,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     setAuthMessage(null);
     setIsGoogleSubmitting(true);
     try {
-      await signInWithGoogle(
+      const user = await signInWithGoogle(
         role,
         {
           fullName: fullName.trim() || undefined,
@@ -214,7 +230,34 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         },
         authMode
       );
-      setAuthMessage({ text: 'Redirecting to Google...', type: 'info' });
+      if (user) {
+        setAuthMessage({
+          text: authMode === 'signup' ? 'Registered with Google! Opening your dashboard...' : 'Signed in with Google! Opening your dashboard...',
+          type: 'success',
+        });
+        window.setTimeout(() => {
+          onClose();
+          if (role === 'mentor') {
+            if (authMode === 'signup') {
+              if (onMentorRegister) onMentorRegister();
+              else if (onMentorSuccess) onMentorSuccess();
+            } else {
+              if (onMentorLogin) onMentorLogin();
+              else if (onMentorSuccess) onMentorSuccess();
+            }
+          } else {
+            if (authMode === 'signup') {
+              if (onStudentRegister) onStudentRegister();
+              else if (onStudentSuccess) onStudentSuccess();
+            } else {
+              if (onStudentLogin) onStudentLogin();
+              else if (onStudentSuccess) onStudentSuccess();
+            }
+          }
+        }, 400);
+      } else {
+        setAuthMessage({ text: 'Redirecting to Google...', type: 'info' });
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Google sign-in could not be completed.';
       setAuthMessage({ text: msg, type: 'error' });

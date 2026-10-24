@@ -33,7 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </a>
 
         {/* Zone 2: 4 clean single-line nav links */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+        <nav className="hidden md:flex items-center gap-8 text-sm lg:text-base font-semibold">
           <a
             href="#strategy"
             className={`whitespace-nowrap transition-colors ${
@@ -72,7 +72,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-4 shrink-0">
           {/* Theme Switcher Segmented Control */}
           <div
-            className={`flex items-center p-1 rounded-lg text-xs font-semibold border ${
+            className={`flex items-center p-1 rounded-xl text-xs sm:text-sm font-semibold border ${
               isDark
                 ? 'bg-zinc-900 border-zinc-800 text-zinc-300'
                 : 'bg-slate-100 border-slate-200 text-slate-700'
@@ -80,7 +80,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <button
               onClick={() => onToggleTheme('dark')}
-              className={`px-3 py-1.5 rounded-md transition-all whitespace-nowrap font-mono ${
+              className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap font-mono ${
                 isDark
                   ? 'bg-black text-[#60A5FA] border border-[#3B82F6]/40 shadow-sm font-bold'
                   : 'text-slate-500 hover:text-slate-900'
@@ -91,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
             <button
               onClick={() => onToggleTheme('light')}
-              className={`px-3 py-1.5 rounded-md transition-all whitespace-nowrap font-mono ${
+              className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap font-mono ${
                 !isDark
                   ? 'bg-white text-[#0066FF] shadow-sm font-bold border border-slate-200'
                   : 'text-zinc-400 hover:text-white'
@@ -105,7 +105,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Primary Action Button */}
           <button
             onClick={onOpenBooking}
-            className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all whitespace-nowrap shrink-0 shadow-sm font-mono ${
+            className={`px-5 py-2.5 text-sm font-bold uppercase tracking-wider rounded-xl transition-all whitespace-nowrap shrink-0 shadow-sm font-mono ${
               isDark
                 ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB] active:scale-95'
                 : 'bg-[#0066FF] text-white hover:bg-[#0052cc] active:scale-95 shadow-[#0066FF]/20 shadow-md'

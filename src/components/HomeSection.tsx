@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Crown, Gem, Image as ImageIcon, Sparkles, X, Info, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Crown, Gem, Image as ImageIcon, Sparkles, X, Info, ShieldCheck, CheckCircle2, Check } from 'lucide-react';
 import { SessionValueSection } from './SessionValueSection.tsx';
 
 interface HomeSectionProps {
@@ -8,6 +8,7 @@ interface HomeSectionProps {
   onTakeAssessment: () => void;
   onBookRankerSession: () => void;
   onViewMentors: () => void;
+  onOpenSyllabusTracker?: () => void;
 }
 
 const tierPlans = [
@@ -164,6 +165,7 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
   onTakeAssessment,
   onBookRankerSession,
   onViewMentors,
+  onOpenSyllabusTracker,
 }) => {
   const isDark = theme === 'dark';
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -278,6 +280,8 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
     <div className={`home-content ${isDark ? 'home-content--dark' : 'home-content--light'}`}>
       <section className="home-intro" aria-labelledby="home-title">
         <div className="home-intro__copy">
+          <h1 id="home-title" className="home-intro__title home-intro__title--tagline"><span>The NEET race</span><span>is real.</span></h1>
+          <p className="home-intro__identity home-intro__identity--ask">Consult those who cleared</p>
           <div className="home-intro__aspirants">
             <span><strong>22.79</strong> <span className="home-intro__unit">Lakh Aspirants</span></span>
           </div>
@@ -289,8 +293,6 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
               </div>
             ))}
           </div>
-          <h1 id="home-title" className="home-intro__title home-intro__title--tagline"><span>The NEET race</span><span>is real.</span></h1>
-          <p className="home-intro__identity home-intro__identity--ask">Consult those who cleared</p>
           <div className="home-intro__actions">
             <button
               className="home-intro__action cursor-pointer"
@@ -710,6 +712,334 @@ export const HomeSection: React.FC<HomeSectionProps> = ({
           </section>
         </div>
       )}
+
+      {/* ================= SECTION: WHY US (US VS COMPETITORS) ================= */}
+      <section className="home-why-us py-14 sm:py-16 border-t border-[var(--home-line)]" aria-labelledby="why-us-title">
+        <div className="flex flex-col items-center justify-center text-center mb-8 sm:mb-12">
+          <div className="home-eyebrow flex items-center justify-center gap-2 mb-2">
+            <span className="home-eyebrow__mark" />
+            THE AIR ADVANTAGE / COMPARISON
+          </div>
+          <h2
+            id="why-us-title"
+            className={`text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-2 ${
+              isDark ? 'text-white' : 'text-zinc-900'
+            }`}
+          >
+            Why Us
+          </h2>
+          <span className="text-xs font-mono tracking-widest text-zinc-400 uppercase">
+            AIR NEETWORK TOPPERS VS TRADITIONAL COACHING & AGGREGATORS
+          </span>
+        </div>
+
+        {/* Comparison Cards Grid: Left = US CARD, Right = COMPETITORS CARD */}
+        <div className="max-w-[1040px] mx-auto w-full px-4 sm:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+            {/* LEFT CARD: US CARD (AIR NEETwork) */}
+            <div
+              className={`relative overflow-hidden rounded-3xl p-6 sm:p-8 border transition-all duration-300 flex flex-col justify-between ${
+                isDark
+                  ? 'bg-gradient-to-b from-[#0a1e3b] via-[#071428] to-[#040b17] border-blue-500/60 shadow-[0_16px_50px_rgba(59,130,246,0.22)]'
+                  : 'bg-gradient-to-b from-blue-50/95 via-sky-50/70 to-white border-blue-300 shadow-xl'
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between gap-3 mb-5">
+                  <div
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider border ${
+                      isDark
+                        ? 'bg-blue-500/20 text-[#60A5FA] border-blue-400/40'
+                        : 'bg-blue-100 text-[#0066FF] border-blue-300'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>AIR NEETwork (Us)</span>
+                  </div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold">
+                    ✓ Verified 1-on-1
+                  </span>
+                </div>
+
+                <h3 className={`text-xl sm:text-2xl font-black tracking-tight mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  Direct Mentoring by Real Top Rankers
+                </h3>
+                <p className={`text-xs sm:text-sm mb-6 leading-relaxed ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
+                  Personal strategy calls with medical students who cleared NEET UG with top All India Ranks.
+                </p>
+
+                {/* Advantage Items List */}
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </div>
+                    <div>
+                      <strong className={`block text-xs sm:text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        Top 100 & GMC MBBS Rankers
+                      </strong>
+                      <span className={`text-xs leading-relaxed block mt-0.5 ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                        Talk directly to rankers from AIIMS New Delhi, MAMC, KGMU with verified 680–715+ scores.
+                      </span>
+                    </div>
+                  </li>
+
+                  <li className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </div>
+                    <div>
+                      <strong className={`block text-xs sm:text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        Negative-Marking & Accuracy Audits
+                      </strong>
+                      <span className={`text-xs leading-relaxed block mt-0.5 ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                        Detailed diagnostic review of your mocks to plug 30–50 marks in silly calculation traps.
+                      </span>
+                    </div>
+                  </li>
+
+                  <li className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </div>
+                    <div>
+                      <strong className={`block text-xs sm:text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        Direct WhatsApp Coordination
+                      </strong>
+                      <span className={`text-xs leading-relaxed block mt-0.5 ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                        Direct time slot coordination with your mentor; no support ticket queues or sales bots.
+                      </span>
+                    </div>
+                  </li>
+
+                  <li className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </div>
+                    <div>
+                      <strong className={`block text-xs sm:text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        Token ₹1 Slot Request & Direct Honorarium
+                      </strong>
+                      <span className={`text-xs leading-relaxed block mt-0.5 ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                        Transparent fixed honorarium directly supporting your MBBS ranker mentor without commissions.
+                      </span>
+                    </div>
+                  </li>
+
+                  <li className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </div>
+                    <div>
+                      <strong className={`block text-xs sm:text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        Personalized Weak-Chapter Plan
+                      </strong>
+                      <span className={`text-xs leading-relaxed block mt-0.5 ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                        Tailored timetable adjusted to your school/coaching load rather than pre-baked generic batches.
+                      </span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Bottom Card Footer Banner */}
+              <div
+                className={`mt-6 pt-4 border-t flex items-center justify-between text-xs font-mono font-bold ${
+                  isDark ? 'border-blue-500/30 text-blue-300' : 'border-blue-200 text-blue-900'
+                }`}
+              >
+                <span>Result: Real score improvement</span>
+                <span className="text-emerald-400">100% Genuine</span>
+              </div>
+            </div>
+
+            {/* RIGHT CARD: OUR COMPETITORS CARD */}
+            <div
+              className={`relative overflow-hidden rounded-3xl p-6 sm:p-8 border transition-all duration-300 flex flex-col justify-between ${
+                isDark
+                  ? 'bg-gradient-to-b from-[#181114] via-[#120d0f] to-[#0a0708] border-zinc-800 text-zinc-300 shadow-lg'
+                  : 'bg-gradient-to-b from-rose-50/50 via-slate-50/60 to-white border-slate-300 text-slate-700 shadow-md'
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between gap-3 mb-5">
+                  <div
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider border ${
+                      isDark
+                        ? 'bg-red-500/10 text-rose-400 border-red-500/30'
+                        : 'bg-rose-100 text-rose-700 border-rose-300'
+                    }`}
+                  >
+                    <X className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Our Competitors</span>
+                  </div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-rose-400 font-bold">
+                    ✕ Traditional Coaching
+                  </span>
+                </div>
+
+                <h3 className={`text-xl sm:text-2xl font-black tracking-tight mb-2 ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>
+                  Mass Batches & Generic Telesales
+                </h3>
+                <p className={`text-xs sm:text-sm mb-6 leading-relaxed ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
+                  Commercial coaching institutes and aggregators driven by volume sales and pre-recorded dumps.
+                </p>
+
+                {/* Competitor Pitfalls List */}
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                      <X className="w-3 h-3 stroke-[2.5]" />
+                    </div>
+                    <div>
+                      <strong className={`block text-xs sm:text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>
+                        Telecallers & Non-Medicos as &apos;Mentors&apos;
+                      </strong>
+                      <span className={`text-xs leading-relaxed block mt-0.5 ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>
+                        Guidance given by sales counselors who never took NEET UG or experienced the exam pressure.
+                      </span>
+                    </div>
+                  </li>
+
+                  <li className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                      <X className="w-3 h-3 stroke-[2.5]" />
+                    </div>
+                    <div>
+                      <strong className={`block text-xs sm:text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>
+                        Crowded 100+ Student Doubt Classes
+                      </strong>
+                      <span className={`text-xs leading-relaxed block mt-0.5 ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>
+                        Questions drown in fast-moving live chats; zero individualized error audit for your mistakes.
+                      </span>
+                    </div>
+                  </li>
+
+                  <li className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                      <X className="w-3 h-3 stroke-[2.5]" />
+                    </div>
+                    <div>
+                      <strong className={`block text-xs sm:text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>
+                        Customer Care Ticket Gatekeeping
+                      </strong>
+                      <span className={`text-xs leading-relaxed block mt-0.5 ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>
+                        No direct access to faculty; waiting 48–72 hours for canned responses through automated portals.
+                      </span>
+                    </div>
+                  </li>
+
+                  <li className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                      <X className="w-3 h-3 stroke-[2.5]" />
+                    </div>
+                    <div>
+                      <strong className={`block text-xs sm:text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>
+                        Expensive Annual Lock-ins (₹30,000–₹1,50,000+)
+                      </strong>
+                      <span className={`text-xs leading-relaxed block mt-0.5 ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>
+                        Heavy upfront non-refundable charges with massive marketing overheads baked into the package.
+                      </span>
+                    </div>
+                  </li>
+
+                  <li className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                      <X className="w-3 h-3 stroke-[2.5]" />
+                    </div>
+                    <div>
+                      <strong className={`block text-xs sm:text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>
+                        Billboard Rankers You Never Speak To
+                      </strong>
+                      <span className={`text-xs leading-relaxed block mt-0.5 ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>
+                        Toppers used strictly on promotional posters who have zero interaction with enrolled students.
+                      </span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Bottom Card Footer Banner */}
+              <div
+                className={`mt-6 pt-4 border-t flex items-center justify-between text-xs font-mono ${
+                  isDark ? 'border-zinc-800 text-zinc-500' : 'border-slate-200 text-slate-500'
+                }`}
+              >
+                <span>Format: Commercial mass coaching</span>
+                <span className="text-rose-400">High marketing markup</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= SECTION: FREE NEET SYLLABUS TRACKER (INSPIRED BY MARKS MATHONGO) ================= */}
+      <section className="py-12 border-t border-[var(--home-line)]" aria-labelledby="syllabus-tracker-banner">
+        <div className="max-w-[1040px] mx-auto w-full px-4 sm:px-6">
+          <div
+            className={`relative overflow-hidden rounded-3xl p-6 sm:p-8 md:p-10 border transition-all duration-300 shadow-xl ${
+              isDark
+                ? 'bg-gradient-to-r from-blue-950/40 via-zinc-900 to-emerald-950/30 border-blue-500/30 shadow-blue-950/20'
+                : 'bg-gradient-to-r from-blue-50/80 via-white to-emerald-50/60 border-blue-200 shadow-blue-100/50'
+            }`}
+          >
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-3 max-w-xl">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Free with Student Account
+                  </span>
+                  <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border ${
+                    isDark ? 'border-zinc-700 bg-zinc-800 text-zinc-300' : 'border-slate-300 bg-slate-100 text-slate-700'
+                  }`}>
+                    Inspired by Marks MathonGo
+                  </span>
+                </div>
+
+                <h3 className={`text-2xl sm:text-3xl font-extrabold tracking-tight font-sans ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  NEET UG <span className="text-[#3B82F6]">Syllabus Tracker</span>
+                </h3>
+
+                <p className={`text-xs sm:text-sm leading-relaxed ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                  Track chapter-wise weightage (Block A/B/C), NCERT line-by-line reading, PYQs practiced (2019–2024), and Rev 1 & 2 cycles for Physics, Chemistry & Biology. Included free for registered students with personalized cloud sync and projected score calculator.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-mono text-zinc-400">
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> 65 Chapters
+                  </span>
+                  <span className="flex items-center gap-1 text-orange-400">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> High-Yield Weightage
+                  </span>
+                  <span className="flex items-center gap-1 text-blue-400">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> NCERT Checklist
+                  </span>
+                  <span className="flex items-center gap-1 text-purple-400">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> PYQ Counts
+                  </span>
+                </div>
+              </div>
+
+              <div className="shrink-0 flex flex-col sm:flex-row md:flex-col gap-3">
+                {onOpenSyllabusTracker && (
+                  <button
+                    type="button"
+                    onClick={onOpenSyllabusTracker}
+                    className="px-6 py-3 rounded-2xl text-xs font-bold font-mono uppercase tracking-wider bg-[#3B82F6] hover:bg-blue-600 text-white transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                  >
+                    <span>Open Syllabus Tracker</span>
+                    <ArrowUpRight className="w-4 h-4" />
+                  </button>
+                )}
+                <span className="text-[11px] font-mono text-zinc-400 text-center">
+                  Sign in or register to track
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section className="home-services" aria-labelledby="services-title">
         <div className="home-services__left">

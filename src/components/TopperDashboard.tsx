@@ -60,6 +60,8 @@ interface TopperDashboardProps {
   userId: string;
   userEmail?: string;
   userName?: string;
+  initialTab?: DashboardTab;
+  autoEditProfile?: boolean;
   onSignOut: () => void;
   onSwitchToHome: () => void;
 }
@@ -71,11 +73,13 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
   userId,
   userEmail,
   userName,
+  initialTab = 'overview',
+  autoEditProfile = false,
   onSignOut,
   onSwitchToHome,
 }) => {
   const isDark = theme === 'dark';
-  const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
+  const [activeTab, setActiveTab] = useState<DashboardTab>(initialTab);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Profile state
@@ -95,8 +99,10 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
   const [confirmToast, setConfirmToast] = useState<string | null>(null);
 
   // In-place Profile Editing state (Single source of truth)
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [editName, setEditName] = useState(profile.name);
+  const [isEditingProfile, setIsEditingProfile] = useState(
+    autoEditProfile || initialTab === 'profile' || !profile.isProfileComplete
+  );
+  const [editName, setEditName] = useState(profile.name || userName || '');
   const [editAvatar, setEditAvatar] = useState(profile.avatarUrl || AVATAR_PRESETS[0].url);
   const [editAirRank, setEditAirRank] = useState(profile.airRank);
   const [editCollege, setEditCollege] = useState(profile.currentCollege);
@@ -110,6 +116,16 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
   const [editBiology, setEditBiology] = useState(profile.subjectWiseMarks?.biology ?? 360);
   const [editBio, setEditBio] = useState(profile.bio || '');
   const [profileSaveSuccess, setProfileSaveSuccess] = useState(false);
+
+  // Sync tab and autoEdit when props change
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+      if (initialTab === 'profile' || autoEditProfile) {
+        setIsEditingProfile(true);
+      }
+    }
+  }, [initialTab, autoEditProfile]);
 
   // Sync session changes from storage in real time
   useEffect(() => {
@@ -345,24 +361,24 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
                     setActiveTab(item.id as DashboardTab);
                     setIsMobileSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                     isActive
                       ? isDark
-                        ? 'bg-[#3B82F6] text-white shadow-sm font-black'
-                        : 'bg-[#0066FF] text-white shadow-sm font-black'
+                        ? 'bg-[#3B82F6] text-white shadow-sm font-bold'
+                        : 'bg-[#0066FF] text-white shadow-sm font-bold'
                       : isDark
                       ? 'text-zinc-300 hover:text-white hover:bg-zinc-800/60'
                       : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className="w-4 h-4 shrink-0" />
+                    <Icon className="w-5 h-5 shrink-0" />
                     <span>{item.label}</span>
                   </div>
 
                   {item.badge && (
                     <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full font-sans font-bold ${
+                      className={`text-xs px-2 py-0.5 rounded-full font-sans font-bold ${
                         isActive
                           ? 'bg-white/20 text-white'
                           : isDark
@@ -385,14 +401,14 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
             <button
               type="button"
               onClick={onSwitchToHome}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-mono font-bold transition-all cursor-pointer ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
                 isDark
                   ? 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:text-white hover:border-zinc-500'
                   : 'border-slate-300 bg-slate-100 text-slate-700 hover:text-slate-900'
               }`}
             >
               <span>Aspirant View</span>
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className="w-4 h-4" />
             </button>
 
             <button
@@ -401,7 +417,7 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
               className="p-2.5 rounded-xl border border-red-500/40 text-red-400 hover:bg-red-950/30 transition-colors cursor-pointer"
               title="Sign Out"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -480,6 +496,43 @@ export const TopperDashboard: React.FC<TopperDashboardProps> = ({
         {/* ================= TAB 1: OVERVIEW ================= */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
+            {/* First-time registration completion prompt banner */}
+            {!profile.isProfileComplete && (
+              <div
+                className={`p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+                  isDark
+                    ? 'bg-blue-950/40 border-blue-500/40 text-blue-100'
+                    : 'bg-blue-50 border-blue-200 text-blue-950'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-sm sm:text-base">
+                      Complete Your Mentor Profile Registration
+                    </h4>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
+                      Fill in your NEET AIR, MBBS Medical College, marks, and next month&apos;s free slots to activate your mentor listing.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('profile');
+                    setIsEditingProfile(true);
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-mono font-bold whitespace-nowrap transition cursor-pointer shadow-sm active:scale-95 ${
+                    isDark
+                      ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
+                      : 'bg-[#0066FF] text-white hover:bg-[#0052cc]'
+                  }`}
+                >
+                  Register Profile Details →
+                </button>
+              </div>
+            )}
+
             {/* Quick Metrics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div

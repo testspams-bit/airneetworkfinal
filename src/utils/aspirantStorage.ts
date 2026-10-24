@@ -461,10 +461,20 @@ export const DAILY_NEET_QUESTIONS_BANK: DailyNeetQuestion[] = [
 ];
 
 // Persistent Helpers
-export function loadAspirantProfile(userEmail?: string, userName?: string): AspirantProfile {
+export function getAspirantStorageKey(baseKey: string, userEmail?: string, userId?: string): string {
+  const id = (userEmail || userId || '').trim().toLowerCase();
+  if (!id || id === 'student_active' || id === 'student_current') {
+    return baseKey;
+  }
+  const safeId = id.replace(/[^a-z0-9_-]/g, '_');
+  return `${baseKey}_${safeId}`;
+}
+
+export function loadAspirantProfile(userEmail?: string, userName?: string, userId?: string): AspirantProfile {
   if (typeof window === 'undefined') return DEFAULT_ASPIRANT_PROFILE;
   try {
-    const raw = localStorage.getItem(ASPIRANT_PROFILE_KEY);
+    const key = getAspirantStorageKey(ASPIRANT_PROFILE_KEY, userEmail, userId);
+    const raw = localStorage.getItem(key);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (userEmail && parsed.email !== userEmail) {
@@ -475,6 +485,34 @@ export function loadAspirantProfile(userEmail?: string, userName?: string): Aspi
       }
       return parsed;
     }
+
+    // If this is an authenticated user logging in or registering for the first time
+    if (userEmail || (userId && userId !== 'student_active' && userId !== 'student_current')) {
+      const freshProfile: AspirantProfile = {
+        ...DEFAULT_ASPIRANT_PROFILE,
+        id: userId || 'asp_' + Math.random().toString(36).substring(2, 9),
+        userId: userId || '',
+        fullName: userName || (userEmail ? userEmail.split('@')[0] : 'NEET Aspirant'),
+        email: userEmail || '',
+        phone: '',
+        coachingInstitute: '',
+        dreamCollege: '',
+        targetScore: 680,
+        currentMockScore: 520,
+        dailyStudyHours: 8,
+        bio: 'Aiming for top rank in NEET UG. Ready to execute custom preparation roadmap.',
+        isProfileComplete: false,
+        streakDays: 1,
+        updatedAt: new Date().toISOString(),
+      };
+      return freshProfile;
+    }
+
+    // Demo/guest fallback
+    const fallbackRaw = localStorage.getItem(ASPIRANT_PROFILE_KEY);
+    if (fallbackRaw) {
+      return JSON.parse(fallbackRaw);
+    }
   } catch (e) {
     console.error('Error loading aspirant profile:', e);
   }
@@ -484,38 +522,46 @@ export function loadAspirantProfile(userEmail?: string, userName?: string): Aspi
   return initial;
 }
 
-export function saveAspirantProfile(profile: AspirantProfile): void {
+export function saveAspirantProfile(profile: AspirantProfile, userEmail?: string, userId?: string): void {
   if (typeof window === 'undefined') return;
   try {
     profile.updatedAt = new Date().toISOString();
+    profile.isProfileComplete = true;
+    const key = getAspirantStorageKey(ASPIRANT_PROFILE_KEY, profile.email || userEmail, profile.userId || userId);
+    localStorage.setItem(key, JSON.stringify(profile));
     localStorage.setItem(ASPIRANT_PROFILE_KEY, JSON.stringify(profile));
   } catch (e) {
     console.error('Error saving aspirant profile:', e);
   }
 }
 
-export function loadAspirantAssessment(): AspirantAssessment {
+export function loadAspirantAssessment(userEmail?: string, userId?: string): AspirantAssessment {
   if (typeof window === 'undefined') return DEFAULT_ASSESSMENT;
   try {
-    const raw = localStorage.getItem(ASPIRANT_ASSESSMENT_KEY);
+    const key = getAspirantStorageKey(ASPIRANT_ASSESSMENT_KEY, userEmail, userId);
+    const raw = localStorage.getItem(key);
     if (raw) return JSON.parse(raw);
+    const fallback = localStorage.getItem(ASPIRANT_ASSESSMENT_KEY);
+    if (fallback) return JSON.parse(fallback);
   } catch (e) {
     console.error('Error loading aspirant assessment:', e);
   }
   return DEFAULT_ASSESSMENT;
 }
 
-export function saveAspirantAssessment(assessment: AspirantAssessment): void {
+export function saveAspirantAssessment(assessment: AspirantAssessment, userEmail?: string, userId?: string): void {
   if (typeof window === 'undefined') return;
   try {
+    const key = getAspirantStorageKey(ASPIRANT_ASSESSMENT_KEY, userEmail, userId);
+    localStorage.setItem(key, JSON.stringify(assessment));
     localStorage.setItem(ASPIRANT_ASSESSMENT_KEY, JSON.stringify(assessment));
   } catch (e) {
     console.error('Error saving aspirant assessment:', e);
   }
 }
 
-export function addMockTestToAssessment(newTest: MockTestResult): AspirantAssessment {
-  const current = loadAspirantAssessment();
+export function addMockTestToAssessment(newTest: MockTestResult, userEmail?: string, userId?: string): AspirantAssessment {
+  const current = loadAspirantAssessment(userEmail, userId);
   const updatedTests = [newTest, ...current.recentMockTests];
   const updated: AspirantAssessment = {
     ...current,
@@ -523,7 +569,7 @@ export function addMockTestToAssessment(newTest: MockTestResult): AspirantAssess
     predictedAir: newTest.predictedAir,
     recentMockTests: updatedTests,
   };
-  saveAspirantAssessment(updated);
+  saveAspirantAssessment(updated, userEmail, userId);
   return updated;
 }
 

@@ -6,7 +6,7 @@ export interface ChatTurn {
 }
 
 export async function generateChatReply(messages: ChatTurn[]) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
   if (!apiKey) throw new Error('AI chat is not configured. Add GEMINI_API_KEY to the server environment.');
 
   const conversation = messages
@@ -17,7 +17,7 @@ export async function generateChatReply(messages: ChatTurn[]) {
 
   const ai = new GoogleGenAI({ apiKey });
   const response = await ai.models.generateContent({
-    model: 'gemini-flash-latest',
+    model: 'gemini-2.5-flash',
     contents: `You are the AIR NEETwork support assistant. Help visitors with NEET mentorship, student support, and contacting the team. Be concise, friendly, and do not invent guarantees or admissions outcomes.\n\nConversation:\n${conversation}\nAssistant:`,
   });
 
